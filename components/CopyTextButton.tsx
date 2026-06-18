@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { CopyIcon } from "@/components/Icons";
 
 export function CopyTextButton({
-  className = "btn icon-btn",
+  className = "icon-btn",
   content,
   label = "Copy text"
 }: {
@@ -27,7 +28,7 @@ export function CopyTextButton({
       title={copied ? "Copied" : label}
       type="button"
     >
-      <span aria-hidden="true">{copied ? "✓" : "⧉"}</span>
+      {copied ? <span aria-hidden="true">OK</span> : <CopyIcon />}
       <span className="sr-only">{copied ? "Copied" : label}</span>
     </button>
   );
