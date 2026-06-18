@@ -582,6 +582,28 @@ button {
   background: var(--chip-bg);
 }
 
+.public-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.public-meta-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.public-meta-row .icon {
+  width: 15px;
+  height: 15px;
+}
+
 .mini-card {
   padding: 14px;
 }

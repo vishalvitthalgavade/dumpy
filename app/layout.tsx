@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MotionRoot } from "@/components/MotionPrimitives";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import "./globals.css";
 
@@ -26,8 +27,10 @@ try {
 `
           }}
         />
-        <ThemeToggle />
-        {children}
+        <MotionRoot>
+          <ThemeToggle />
+          {children}
+        </MotionRoot>
       </body>
     </html>
   );

@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CopyIcon, EyeIcon, SearchIcon, TextIcon, UserIcon } from "@/components/Icons";
+import { CopyIcon, EyeIcon, SearchIcon, TextIcon } from "@/components/Icons";
 import type { ContentAnalytics } from "@/lib/analytics";
 import type { TextEntry } from "@/lib/db";
-import { formatDate } from "@/lib/format";
+import { formatShortDate } from "@/lib/format";
 
 export function TextShelf({
   analyticsById = {},
@@ -86,19 +86,12 @@ export function TextShelf({
                     {entry.contentPreview}
                     {entry.characterCount > entry.contentPreview.length ? "..." : ""}
                   </p>
-                  <div className="meta-row">
-                    <span>{entry.characterCount} characters</span>
-                    <span>Saved {formatDate(entry.createdAt)}</span>
-                    <span title="Total views">
+                  <div className="public-meta-row">
+                    <span>
                       <EyeIcon /> {analytics.totalViews} views
                     </span>
-                    <span title="Unique visitors">
-                      <UserIcon /> {analytics.uniqueViews} unique visitors
-                    </span>
-                    <span>
-                      Last viewed{" "}
-                      {analytics.lastViewed ? formatDate(analytics.lastViewed) : "Never"}
-                    </span>
+                    <span aria-hidden="true">•</span>
+                    <span>Saved {formatShortDate(entry.createdAt)}</span>
                   </div>
                 </div>
                 <div className="card-actions">

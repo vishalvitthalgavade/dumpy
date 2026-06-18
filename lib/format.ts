@@ -31,3 +31,16 @@ export function formatDate(value: string | null) {
     timeZoneName: "short"
   }).format(new Date(value));
 }
+
+export function formatShortDate(value: string | null) {
+  if (!value) {
+    return "Not saved yet";
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Kolkata"
+  }).format(new Date(value));
+}

@@ -5,12 +5,11 @@ import {
   CopyIcon,
   EyeIcon,
   FileIcon,
-  SearchIcon,
-  UserIcon
+  SearchIcon
 } from "@/components/Icons";
 import type { ContentAnalytics } from "@/lib/analytics";
 import type { PdfItem } from "@/lib/db";
-import { formatBytes, formatDate } from "@/lib/format";
+import { formatShortDate } from "@/lib/format";
 
 export function PublicShelf({
   analyticsById = {},
@@ -88,19 +87,12 @@ export function PublicShelf({
                 <div className="card-copy">
                   <h4>{pdf.title}</h4>
                   <p>{pdf.fileName}</p>
-                  <div className="meta-row">
-                    <span>{formatBytes(pdf.sizeBytes)}</span>
-                    <span>Uploaded {formatDate(pdf.createdAt)}</span>
-                    <span title="Total views">
+                  <div className="public-meta-row">
+                    <span>
                       <EyeIcon /> {analytics.totalViews} views
                     </span>
-                    <span title="Unique visitors">
-                      <UserIcon /> {analytics.uniqueViews} unique visitors
-                    </span>
-                    <span>
-                      Last viewed{" "}
-                      {analytics.lastViewed ? formatDate(analytics.lastViewed) : "Never"}
-                    </span>
+                    <span aria-hidden="true">•</span>
+                    <span>Saved {formatShortDate(pdf.createdAt)}</span>
                   </div>
                 </div>
                 <div className="card-actions">
