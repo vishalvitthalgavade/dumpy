@@ -25,47 +25,45 @@ function getPool() {
 let schemaPromise: Promise<void> | null = null;
 
 async function ensureSchema() {
-  schemaPromise ??= getPool()
-    .query(`
-      CREATE EXTENSION IF NOT EXISTS pgcrypto;
+  schemaPromise ??= getPool().query(`
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-      CREATE TABLE IF NOT EXISTS pdfs (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        title TEXT NOT NULL,
-        file_name TEXT NOT NULL,
-        mime_type TEXT NOT NULL DEFAULT 'application/pdf',
-        size_bytes INTEGER NOT NULL,
-        data BYTEA NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
+    CREATE TABLE IF NOT EXISTS pdfs (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      title TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      mime_type TEXT NOT NULL DEFAULT 'application/pdf',
+      size_bytes INTEGER NOT NULL,
+      data BYTEA NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
 
-      CREATE TABLE IF NOT EXISTS notes (
-        id INTEGER PRIMARY KEY DEFAULT 1,
-        content TEXT NOT NULL DEFAULT '',
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        CONSTRAINT one_note CHECK (id = 1)
-      );
+    CREATE TABLE IF NOT EXISTS notes (
+      id INTEGER PRIMARY KEY DEFAULT 1,
+      content TEXT NOT NULL DEFAULT '',
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT one_note CHECK (id = 1)
+    );
 
-      CREATE TABLE IF NOT EXISTS text_entries (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
+    CREATE TABLE IF NOT EXISTS text_entries (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
 
-      INSERT INTO notes (id, content)
-      VALUES (1, '')
-      ON CONFLICT (id) DO NOTHING;
+    INSERT INTO notes (id, content)
+    VALUES (1, '')
+    ON CONFLICT (id) DO NOTHING;
 
-      INSERT INTO text_entries (title, content, created_at, updated_at)
-      SELECT 'Saved Text', content, updated_at, updated_at
-      FROM notes
-      WHERE id = 1
-        AND trim(content) <> ''
-        AND NOT EXISTS (SELECT 1 FROM text_entries);
-    `)
-    .then(() => undefined);
+    INSERT INTO text_entries (title, content, created_at, updated_at)
+    SELECT 'Saved Text', content, updated_at, updated_at
+    FROM notes
+    WHERE id = 1
+      AND trim(content) <> ''
+      AND NOT EXISTS (SELECT 1 FROM text_entries);
+  `).then(() => undefined);
 
   await schemaPromise;
 }
@@ -155,6 +153,33 @@ export async function deletePdf(id: string) {
   await getPool().query("DELETE FROM pdfs WHERE id = $1", [id]);
 }
 
+export async function getNote() {
+  await ensureSchema();
+
+  const result = await getPool().query<{ content: string; updated_at: Date }>(
+    `SELECT content, updated_at
+     FROM notes
+     WHERE id = 1`
+  );
+
+  return {
+    content: result.rows[0]?.content ?? "",
+    updatedAt: result.rows[0]?.updated_at.toISOString() ?? null
+  };
+}
+
+export async function saveNote(content: string) {
+  await ensureSchema();
+
+  await getPool().query(
+    `INSERT INTO notes (id, content, updated_at)
+     VALUES (1, $1, NOW())
+     ON CONFLICT (id)
+     DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()`,
+    [content]
+  );
+}
+
 export async function getTextEntries(): Promise<TextEntry[]> {
   await ensureSchema();
 
@@ -222,14 +247,11 @@ export async function createTextEntry(input: {
 }) {
   await ensureSchema();
 
-  const result = await getPool().query<{ id: string }>(
+  await getPool().query(
     `INSERT INTO text_entries (title, content)
-     VALUES ($1, $2)
-     RETURNING id`,
+     VALUES ($1, $2)`,
     [input.title, input.content]
   );
-
-  return result.rows[0].id;
 }
 
 export async function updateTextEntry(input: {

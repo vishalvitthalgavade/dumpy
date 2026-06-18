@@ -22,7 +22,7 @@ export async function loginAction(formData: FormData) {
   const password = String(formData.get("password") ?? "");
 
   if (!verifyPassword(password)) {
-    redirect("/admin/login?error=1");
+    redirect("/admin?error=1");
   }
 
   await createAdminSession();
@@ -84,11 +84,10 @@ export async function createTextAction(formData: FormData) {
     throw new Error("A headline and text are required.");
   }
 
-  const id = await createTextEntry({ title, content });
+  await createTextEntry({ title, content });
 
   revalidatePath("/");
   revalidatePath("/admin");
-  redirect(`/texts/${id}`);
 }
 
 export async function updateTextAction(formData: FormData) {
@@ -111,6 +110,8 @@ export async function updateTextAction(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath(`/texts/${id}`);
+  revalidatePath(`/admin/texts/${id}/edit`);
+  redirect(`/admin/texts/${id}/edit?updated=1`);
 }
 
 export async function deleteTextAction(formData: FormData) {

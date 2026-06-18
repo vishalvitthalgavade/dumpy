@@ -1,63 +1,58 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { loginAction } from "@/app/actions";
+import { notFound } from "next/navigation";
+import { DataNotice } from "@/components/DataNotice";
 import { SetupNotice } from "@/components/SetupNotice";
-import { isAdmin } from "@/lib/auth";
 import { getMissingConfig } from "@/lib/config";
+import { getTextEntry } from "@/lib/db";
+import { formatDate } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export default async function Login({
-  searchParams
+export default async function TextView({
+  params
 }: {
-  searchParams: Promise<{ error?: string }>;
+  params: Promise<{ id: string }>;
 }) {
   const missingConfig = getMissingConfig();
   if (missingConfig.length > 0) {
     return <SetupNotice missing={missingConfig} />;
   }
 
-  if (await isAdmin()) {
-    redirect("/admin");
+  const { id } = await params;
+  const entry = await getTextEntry(id).catch(() => undefined);
+
+  if (entry === undefined) {
+    return <DataNotice />;
   }
 
-  const params = await searchParams;
+  if (!entry) {
+    notFound();
+  }
 
   return (
-    <main className="login">
-      <section className="panel">
-        <div className="brand" style={{ marginBottom: 22 }}>
+    <main className="shell">
+      <header className="topbar">
+        <div className="brand">
           <div className="mark">D</div>
           <div>
             <h1>Dumpyard</h1>
-            <p>Admin login</p>
+            <p>{formatDate(entry.createdAt)}</p>
           </div>
         </div>
-
-        {params.error ? (
-          <p className="notice">That password did not match.</p>
-        ) : null}
-
-        <form action={loginAction} className="form">
-          <label className="field">
-            <span>Password</span>
-            <input
-              autoComplete="current-password"
-              autoFocus
-              className="input"
-              name="password"
-              required
-              type="password"
-            />
-          </label>
-          <button className="btn primary" type="submit">
-            Enter Admin
-          </button>
+        <nav className="nav">
           <Link className="btn" href="/">
-            Back to public view
+            Back
           </Link>
-        </form>
-      </section>
+          <Link className="btn" href="/admin">
+            Admin
+          </Link>
+        </nav>
+      </header>
+
+      <article className="text-document">
+        <h2>{entry.title}</h2>
+        <div className="note-body">{entry.content}</div>
+      </article>
     </main>
   );
 }

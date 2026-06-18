@@ -150,22 +150,6 @@ textarea {
   color: var(--rose);
 }
 
-.icon-btn {
-  width: 42px;
-  padding: 0;
-  flex: 0 0 auto;
-  font-size: 1.05rem;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -365,6 +349,11 @@ textarea {
   margin: 0 0 10px;
 }
 
+.edit-panel {
+  width: min(860px, 100%);
+  margin: 0 auto;
+}
+
 .note-body {
   min-height: 280px;
   white-space: pre-wrap;
@@ -389,21 +378,6 @@ textarea {
   letter-spacing: 0;
 }
 
-.text-document-heading,
-.text-preview-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.text-document-heading {
-  justify-content: space-between;
-}
-
-.text-preview-row p {
-  flex: 1;
-}
-
 .empty {
   display: grid;
   min-height: 180px;
@@ -419,6 +393,12 @@ textarea {
 .form {
   display: grid;
   gap: 14px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .field {

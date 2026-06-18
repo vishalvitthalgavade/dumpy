@@ -20,15 +20,8 @@ export function formatDate(value: string | null) {
     return "Not saved yet";
   }
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "Date unavailable";
-  }
-
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Asia/Kolkata",
-    timeZoneName: "short"
-  }).format(date);
+    timeStyle: "short"
+  }).format(new Date(value));
 }

@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CopyTextButton } from "@/components/CopyTextButton";
 import type { TextEntry } from "@/lib/db";
 import { formatDate } from "@/lib/format";
 
 export function TextShelf({ entries }: { entries: TextEntry[] }) {
   const [query, setQuery] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase();
@@ -18,6 +18,12 @@ export function TextShelf({ entries }: { entries: TextEntry[] }) {
       `${entry.title} ${entry.contentPreview}`.toLowerCase().includes(cleanQuery)
     );
   }, [entries, query]);
+
+  async function copyText(entry: TextEntry) {
+    await navigator.clipboard.writeText(entry.content);
+    setCopiedId(entry.id);
+    window.setTimeout(() => setCopiedId(null), 1400);
+  }
 
   return (
     <section className="shelf-section">
@@ -52,20 +58,23 @@ export function TextShelf({ entries }: { entries: TextEntry[] }) {
               <div className="text-icon">TXT</div>
               <div>
                 <h4>{entry.title}</h4>
-                <div className="text-preview-row">
-                  <p>
-                    {entry.contentPreview}
-                    {entry.characterCount > entry.contentPreview.length ? "..." : ""} -{" "}
-                    {entry.updatedAt !== entry.createdAt ? "Updated " : "Created "}
-                    {formatDate(entry.updatedAt ?? entry.createdAt)}
-                  </p>
-                  <CopyTextButton content={entry.content} />
-                </div>
+                <p>
+                  {entry.contentPreview}
+                  {entry.characterCount > entry.contentPreview.length ? "..." : ""} -{" "}
+                  {formatDate(entry.createdAt)}
+                </p>
               </div>
               <div className="card-actions">
                 <a className="btn primary" href={`/texts/${entry.id}`}>
                   View
                 </a>
+                <button
+                  className="btn"
+                  onClick={() => copyText(entry)}
+                  type="button"
+                >
+                  {copiedId === entry.id ? "Copied" : "Copy"}
+                </button>
               </div>
             </article>
           ))
