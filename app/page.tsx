@@ -5,6 +5,7 @@ import { DataNotice } from "@/components/DataNotice";
 import { PublicShelf } from "@/components/PublicShelf";
 import { SetupNotice } from "@/components/SetupNotice";
 import { TextShelf } from "@/components/TextShelf";
+import { AnimatedCounter, MotionCard, MotionPress } from "@/components/MotionPrimitives";
 import { getMissingConfig } from "@/lib/config";
 import { getPdfs, getTextEntries } from "@/lib/db";
 import { getPdfAnalyticsMap, getTextAnalyticsMap } from "@/lib/analytics";
@@ -58,30 +59,38 @@ export default async function Home() {
             fast search, and a calm interface built for reading.
           </p>
           <div className="hero-actions">
-            <a className="btn primary" href="#content">
-              Explore content
-              <ArrowIcon />
-            </a>
-            <Link className="btn ghost" href="/admin">
-              Admin
-            </Link>
+            <MotionPress>
+              <a className="btn primary" href="#content">
+                Explore content
+                <ArrowIcon />
+              </a>
+            </MotionPress>
+            <MotionPress>
+              <Link className="btn ghost" href="/admin">
+                Admin
+              </Link>
+            </MotionPress>
           </div>
         </div>
         <div className="hero-panel" aria-label="Repository stats">
-          <div className="stat-card">
+          <MotionCard as="div" className="stat-card">
             <div className="resource-icon pdf-icon">
               <FileIcon />
             </div>
             <span>PDF Library</span>
-            <strong>{pdfs.length}</strong>
-          </div>
-          <div className="stat-card">
+            <strong>
+              <AnimatedCounter value={pdfs.length} />
+            </strong>
+          </MotionCard>
+          <MotionCard as="div" className="stat-card" delay={0.05}>
             <div className="resource-icon text-icon">
               <TextIcon />
             </div>
             <span>Saved Texts</span>
-            <strong>{textEntries.length}</strong>
-          </div>
+            <strong>
+              <AnimatedCounter value={textEntries.length} />
+            </strong>
+          </MotionCard>
         </div>
       </section>
 

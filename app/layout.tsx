@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MotionRoot } from "@/components/MotionPrimitives";
+import { MotionRoot, PageMotion } from "@/components/MotionPrimitives";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import "./globals.css";
 
@@ -29,7 +29,7 @@ try {
         />
         <MotionRoot>
           <ThemeToggle />
-          {children}
+          <PageMotion>{children}</PageMotion>
         </MotionRoot>
       </body>
     </html>

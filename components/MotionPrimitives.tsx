@@ -11,6 +11,11 @@ import {
 } from "framer-motion";
 
 export const premiumEase = [0.22, 1, 0.36, 1] as const;
+export const springTransition = {
+  type: "spring",
+  stiffness: 400,
+  damping: 30
+} as const;
 
 export function MotionRoot({ children }: { children: React.ReactNode }) {
   return <LazyMotion features={domAnimation}>{children}</LazyMotion>;
@@ -24,6 +29,7 @@ export function PageMotion({ children }: { children: React.ReactNode }) {
       initial={reducedMotion ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: premiumEase }}
+      style={{ willChange: "opacity, transform" }}
     >
       {children}
     </m.div>
@@ -55,12 +61,12 @@ export function MotionCard({
       whileHover={{ scale: 1.02, y: -2 }}
       whileTap={{ scale: 0.98 }}
       transition={{
-        duration: 0.15,
-        ease: premiumEase,
+        ...springTransition,
         layout: { duration: 0.25, ease: premiumEase },
         opacity: { duration: 0.2, delay },
         y: { duration: 0.2, delay }
       }}
+      style={{ willChange: "opacity, transform" }}
       title={title}
     >
       {children}
@@ -84,7 +90,8 @@ export function MotionPress({
       className={className}
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
-      transition={{ duration: 0.15, ease: premiumEase }}
+      transition={springTransition}
+      style={{ display: "inline-flex", willChange: "transform" }}
     >
       {children}
     </m.span>

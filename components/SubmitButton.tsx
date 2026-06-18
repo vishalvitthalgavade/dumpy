@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
+import { MotionPress } from "@/components/MotionPrimitives";
 
 export function SubmitButton({
   children,
@@ -14,9 +15,11 @@ export function SubmitButton({
   const { pending } = useFormStatus();
 
   return (
-    <button className={className} disabled={pending} type="submit">
-      {pending ? <span className="spinner" /> : null}
-      {pending ? pendingLabel : children}
-    </button>
+    <MotionPress>
+      <button className={className} disabled={pending} type="submit">
+        {pending ? <span className="button-skeleton" /> : null}
+        {pending ? pendingLabel : children}
+      </button>
+    </MotionPress>
   );
 }

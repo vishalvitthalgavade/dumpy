@@ -117,7 +117,6 @@ button {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
   padding: 24px 0 64px;
-  animation: fade-up 520ms ease both;
 }
 
 .topbar,
@@ -222,7 +221,6 @@ button {
 }
 
 .theme-toggle:hover {
-  transform: translateY(-2px);
   border-color: rgba(20, 184, 166, 0.36);
   box-shadow: var(--shadow-md);
 }
@@ -272,14 +270,13 @@ button {
 .btn:hover,
 .file-input::file-selector-button:hover,
 .icon-btn:hover {
-  transform: translateY(-2px);
   border-color: rgba(20, 184, 166, 0.32);
   box-shadow: 0 16px 34px rgba(15, 118, 110, 0.16);
 }
 
 .btn:active,
 .icon-btn:active {
-  transform: translateY(0) scale(0.98);
+  transform: translateZ(0);
 }
 
 .btn:disabled {
@@ -513,6 +510,7 @@ button {
     transform 180ms ease,
     box-shadow 180ms ease,
     border-color 180ms ease;
+  will-change: transform, opacity;
 }
 
 .content-card {
@@ -524,7 +522,6 @@ button {
 }
 
 .card:hover {
-  transform: translateY(-3px);
   border-color: rgba(20, 184, 166, 0.28);
   box-shadow: var(--shadow-md);
 }
@@ -695,7 +692,6 @@ button {
 }
 
 .dropzone:hover {
-  transform: translateY(-2px);
   border-color: var(--accent);
   box-shadow: 0 16px 38px rgba(15, 118, 110, 0.12);
 }
@@ -755,7 +751,6 @@ button {
 .login {
   width: min(450px, calc(100% - 32px));
   margin: 10vh auto;
-  animation: fade-up 520ms ease both;
 }
 
 .auth-card {
@@ -784,13 +779,36 @@ button {
   color: #9f1239;
 }
 
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.45);
-  border-top-color: #fff;
+.button-skeleton,
+.skeleton-line {
+  position: relative;
+  overflow: hidden;
   border-radius: 999px;
-  animation: spin 800ms linear infinite;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.button-skeleton {
+  width: 18px;
+  height: 10px;
+}
+
+.skeleton-line {
+  min-height: 12px;
+}
+
+.button-skeleton::after,
+.skeleton-line::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+  content: "";
+  transform: translateX(-100%);
+  animation: shimmer 1.05s infinite;
 }
 
 .sr-only {
@@ -802,20 +820,9 @@ button {
   white-space: nowrap;
 }
 
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
+@keyframes shimmer {
   to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+    transform: translateX(100%);
   }
 }
 

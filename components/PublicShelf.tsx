@@ -7,6 +7,7 @@ import {
   FileIcon,
   SearchIcon
 } from "@/components/Icons";
+import { MotionCard, MotionList, MotionPress } from "@/components/MotionPrimitives";
 import type { ContentAnalytics } from "@/lib/analytics";
 import type { PdfItem } from "@/lib/db";
 import { formatShortDate } from "@/lib/format";
@@ -72,55 +73,67 @@ export function PublicShelf({
             </span>
           </div>
         ) : (
-          filtered.map((pdf) => {
-            const analytics = analyticsById[pdf.id] ?? {
-              totalViews: 0,
-              uniqueViews: 0,
-              lastViewed: null
-            };
+          <MotionList>
+            {filtered.map((pdf, index) => {
+              const analytics = analyticsById[pdf.id] ?? {
+                totalViews: 0,
+                uniqueViews: 0,
+                lastViewed: null
+              };
 
-            return (
-              <article className="card content-card" key={pdf.id}>
-                <div className="resource-icon pdf-icon">
-                  <FileIcon />
-                </div>
-                <div className="card-copy">
-                  <h4>{pdf.title}</h4>
-                  <p>{pdf.fileName}</p>
-                  <div className="public-meta-row">
-                    <span>
-                      <EyeIcon /> {analytics.totalViews} views
-                    </span>
-                    <span aria-hidden="true">•</span>
-                    <span>Saved {formatShortDate(pdf.createdAt)}</span>
+              return (
+                <MotionCard
+                  className="card content-card"
+                  delay={Math.min(index * 0.05, 0.25)}
+                  key={pdf.id}
+                >
+                  <div className="resource-icon pdf-icon">
+                    <FileIcon />
                   </div>
-                </div>
-                <div className="card-actions">
-                  <a
-                    className="icon-btn primary"
-                    href={`/api/pdfs/${pdf.id}`}
-                    title="View PDF"
-                  >
-                    <EyeIcon />
-                  </a>
-                  <button
-                    className="icon-btn"
-                    onClick={() => copyLink(pdf.id)}
-                    title="Copy link"
-                    type="button"
-                  >
-                    <CopyIcon />
-                    <span className="sr-only">
-                      {copiedId === pdf.id ? "Copied" : "Copy link"}
-                    </span>
-                  </button>
-                  <a className="btn compact" href={`/api/pdfs/${pdf.id}?download=1`}>
-                    Download
-                  </a>
-                </div>
-              </article>
-            );
-          })
+                  <div className="card-copy">
+                    <h4>{pdf.title}</h4>
+                    <p>{pdf.fileName}</p>
+                    <div className="public-meta-row">
+                      <span>
+                        <EyeIcon /> {analytics.totalViews} views
+                      </span>
+                      <span aria-hidden="true">•</span>
+                      <span>Saved {formatShortDate(pdf.createdAt)}</span>
+                    </div>
+                  </div>
+                  <div className="card-actions">
+                    <MotionPress>
+                      <a
+                        className="icon-btn primary"
+                        href={`/api/pdfs/${pdf.id}`}
+                        title="View PDF"
+                      >
+                        <EyeIcon />
+                      </a>
+                    </MotionPress>
+                    <MotionPress>
+                      <button
+                        className="icon-btn"
+                        onClick={() => copyLink(pdf.id)}
+                        title="Copy link"
+                        type="button"
+                      >
+                        <CopyIcon />
+                        <span className="sr-only">
+                          {copiedId === pdf.id ? "Copied" : "Copy link"}
+                        </span>
+                      </button>
+                    </MotionPress>
+                    <MotionPress>
+                      <a className="btn compact" href={`/api/pdfs/${pdf.id}?download=1`}>
+                        Download
+                      </a>
+                    </MotionPress>
+                  </div>
+                </MotionCard>
+              );
+            })}
+          </MotionList>
         )}
       </div>
     </section>

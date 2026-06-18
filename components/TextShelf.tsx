@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CopyIcon, EyeIcon, SearchIcon, TextIcon } from "@/components/Icons";
+import { MotionCard, MotionList, MotionPress } from "@/components/MotionPrimitives";
 import type { ContentAnalytics } from "@/lib/analytics";
 import type { TextEntry } from "@/lib/db";
 import { formatShortDate } from "@/lib/format";
@@ -68,51 +69,65 @@ export function TextShelf({
             </span>
           </div>
         ) : (
-          filtered.map((entry) => {
-            const analytics = analyticsById[entry.id] ?? {
-              totalViews: 0,
-              uniqueViews: 0,
-              lastViewed: null
-            };
+          <MotionList>
+            {filtered.map((entry, index) => {
+              const analytics = analyticsById[entry.id] ?? {
+                totalViews: 0,
+                uniqueViews: 0,
+                lastViewed: null
+              };
 
-            return (
-              <article className="card content-card" key={entry.id}>
-                <div className="resource-icon text-icon">
-                  <TextIcon />
-                </div>
-                <div className="card-copy">
-                  <h4>{entry.title}</h4>
-                  <p>
-                    {entry.contentPreview}
-                    {entry.characterCount > entry.contentPreview.length ? "..." : ""}
-                  </p>
-                  <div className="public-meta-row">
-                    <span>
-                      <EyeIcon /> {analytics.totalViews} views
-                    </span>
-                    <span aria-hidden="true">•</span>
-                    <span>Saved {formatShortDate(entry.createdAt)}</span>
+              return (
+                <MotionCard
+                  className="card content-card"
+                  delay={Math.min(index * 0.05, 0.25)}
+                  key={entry.id}
+                >
+                  <div className="resource-icon text-icon">
+                    <TextIcon />
                   </div>
-                </div>
-                <div className="card-actions">
-                  <a className="icon-btn primary" href={`/texts/${entry.id}`} title="View text">
-                    <EyeIcon />
-                  </a>
-                  <button
-                    className="icon-btn"
-                    onClick={() => copyText(entry)}
-                    title="Copy text"
-                    type="button"
-                  >
-                    <CopyIcon />
-                    <span className="sr-only">
-                      {copiedId === entry.id ? "Copied" : "Copy text"}
-                    </span>
-                  </button>
-                </div>
-              </article>
-            );
-          })
+                  <div className="card-copy">
+                    <h4>{entry.title}</h4>
+                    <p>
+                      {entry.contentPreview}
+                      {entry.characterCount > entry.contentPreview.length ? "..." : ""}
+                    </p>
+                    <div className="public-meta-row">
+                      <span>
+                        <EyeIcon /> {analytics.totalViews} views
+                      </span>
+                      <span aria-hidden="true">•</span>
+                      <span>Saved {formatShortDate(entry.createdAt)}</span>
+                    </div>
+                  </div>
+                  <div className="card-actions">
+                    <MotionPress>
+                      <a
+                        className="icon-btn primary"
+                        href={`/texts/${entry.id}`}
+                        title="View text"
+                      >
+                        <EyeIcon />
+                      </a>
+                    </MotionPress>
+                    <MotionPress>
+                      <button
+                        className="icon-btn"
+                        onClick={() => copyText(entry)}
+                        title="Copy text"
+                        type="button"
+                      >
+                        <CopyIcon />
+                        <span className="sr-only">
+                          {copiedId === entry.id ? "Copied" : "Copy text"}
+                        </span>
+                      </button>
+                    </MotionPress>
+                  </div>
+                </MotionCard>
+              );
+            })}
+          </MotionList>
         )}
       </div>
     </section>
