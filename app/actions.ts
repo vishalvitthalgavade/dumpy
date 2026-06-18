@@ -22,7 +22,7 @@ export async function loginAction(formData: FormData) {
   const password = String(formData.get("password") ?? "");
 
   if (!verifyPassword(password)) {
-    redirect("/admin?error=1");
+    redirect("/admin/login?error=1");
   }
 
   await createAdminSession();

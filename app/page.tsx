@@ -1,32 +1,26 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { DataNotice } from "@/components/DataNotice";
+import { PublicShelf } from "@/components/PublicShelf";
 import { SetupNotice } from "@/components/SetupNotice";
+import { TextShelf } from "@/components/TextShelf";
 import { getMissingConfig } from "@/lib/config";
-import { getTextEntry } from "@/lib/db";
-import { formatDate } from "@/lib/format";
+import { getPdfs, getTextEntries } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default async function TextView({
-  params
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function Home() {
   const missingConfig = getMissingConfig();
   if (missingConfig.length > 0) {
     return <SetupNotice missing={missingConfig} />;
   }
 
-  const { id } = await params;
-  const entry = await getTextEntry(id).catch(() => undefined);
+  const [pdfs, textEntries] = await Promise.all([
+    getPdfs(),
+    getTextEntries()
+  ]).catch(() => [null, null]);
 
-  if (entry === undefined) {
+  if (!pdfs || !textEntries) {
     return <DataNotice />;
-  }
-
-  if (!entry) {
-    notFound();
   }
 
   return (
@@ -36,23 +30,39 @@ export default async function TextView({
           <div className="mark">D</div>
           <div>
             <h1>Dumpyard</h1>
-            <p>{formatDate(entry.createdAt)}</p>
+            <p>Public PDFs and saved text.</p>
           </div>
         </div>
         <nav className="nav">
-          <Link className="btn" href="/">
-            Back
-          </Link>
           <Link className="btn" href="/admin">
             Admin
           </Link>
         </nav>
       </header>
 
-      <article className="text-document">
-        <h2>{entry.title}</h2>
-        <div className="note-body">{entry.content}</div>
-      </article>
+      <section className="hero">
+        <div className="eyebrow">Dumpyard</div>
+        <h2>Read what has been stored.</h2>
+        <p>
+          Browse the public shelf of uploaded PDFs and saved text entries from
+          one quiet place.
+        </p>
+        <div className="stats">
+          <div className="stat">
+            <strong>{pdfs.length}</strong>
+            <span>PDFs</span>
+          </div>
+          <div className="stat">
+            <strong>{textEntries.length}</strong>
+            <span>Texts</span>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid">
+        <PublicShelf pdfs={pdfs} />
+        <TextShelf entries={textEntries} />
+      </div>
     </main>
   );
 }
