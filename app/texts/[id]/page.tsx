@@ -2,11 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { DataNotice } from "@/components/DataNotice";
-import { TextIcon } from "@/components/Icons";
+import { EyeIcon, TextIcon, UserIcon } from "@/components/Icons";
 import { SetupNotice } from "@/components/SetupNotice";
 import { getMissingConfig } from "@/lib/config";
 import { getTextEntry } from "@/lib/db";
 import { formatDate } from "@/lib/format";
+import { getContentAnalytics, getTextAnalyticsPaths } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,8 @@ export default async function TextView({
   if (!entry) {
     notFound();
   }
+
+  const analytics = await getContentAnalytics(getTextAnalyticsPaths(entry.id));
 
   return (
     <main className="shell">
@@ -58,6 +61,12 @@ export default async function TextView({
             <TextIcon />
           </div>
           <span>Saved {formatDate(entry.createdAt)}</span>
+          <span>
+            <EyeIcon /> {analytics.totalViews} views
+          </span>
+          <span>
+            <UserIcon /> Viewed by {analytics.uniqueViews} unique visitors
+          </span>
         </div>
         <h2>{entry.title}</h2>
         <div className="note-body">{entry.content}</div>

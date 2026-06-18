@@ -573,10 +573,17 @@ button {
 }
 
 .meta-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 4px 8px;
   background: var(--chip-bg);
+}
+
+.mini-card {
+  padding: 14px;
 }
 
 .card-actions {
@@ -701,6 +708,7 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
   margin-bottom: 18px;
   color: var(--muted);
   font-size: 0.9rem;

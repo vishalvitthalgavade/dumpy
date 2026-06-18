@@ -7,6 +7,7 @@ import { SetupNotice } from "@/components/SetupNotice";
 import { TextShelf } from "@/components/TextShelf";
 import { getMissingConfig } from "@/lib/config";
 import { getPdfs, getTextEntries } from "@/lib/db";
+import { getPdfAnalyticsMap, getTextAnalyticsMap } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -16,12 +17,14 @@ export default async function Home() {
     return <SetupNotice missing={missingConfig} />;
   }
 
-  const [pdfs, textEntries] = await Promise.all([
+  const [pdfs, textEntries, pdfAnalytics, textAnalytics] = await Promise.all([
     getPdfs(),
-    getTextEntries()
-  ]).catch(() => [null, null]);
+    getTextEntries(),
+    getPdfAnalyticsMap(),
+    getTextAnalyticsMap()
+  ]).catch(() => [null, null, null, null]);
 
-  if (!pdfs || !textEntries) {
+  if (!pdfs || !textEntries || !pdfAnalytics || !textAnalytics) {
     return <DataNotice />;
   }
 
@@ -83,8 +86,8 @@ export default async function Home() {
       </section>
 
       <div className="grid" id="content">
-        <PublicShelf pdfs={pdfs} />
-        <TextShelf entries={textEntries} />
+        <PublicShelf analyticsById={pdfAnalytics} pdfs={pdfs} />
+        <TextShelf analyticsById={textAnalytics} entries={textEntries} />
       </div>
     </main>
   );

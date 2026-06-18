@@ -1,11 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CopyIcon, EyeIcon, SearchIcon, TextIcon } from "@/components/Icons";
+import { CopyIcon, EyeIcon, SearchIcon, TextIcon, UserIcon } from "@/components/Icons";
+import type { ContentAnalytics } from "@/lib/analytics";
 import type { TextEntry } from "@/lib/db";
 import { formatDate } from "@/lib/format";
 
-export function TextShelf({ entries }: { entries: TextEntry[] }) {
+export function TextShelf({
+  analyticsById = {},
+  entries
+}: {
+  analyticsById?: Record<string, ContentAnalytics>;
+  entries: TextEntry[];
+}) {
   const [query, setQuery] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -61,40 +68,58 @@ export function TextShelf({ entries }: { entries: TextEntry[] }) {
             </span>
           </div>
         ) : (
-          filtered.map((entry) => (
-            <article className="card content-card" key={entry.id}>
-              <div className="resource-icon text-icon">
-                <TextIcon />
-              </div>
-              <div className="card-copy">
-                <h4>{entry.title}</h4>
-                <p>
-                  {entry.contentPreview}
-                  {entry.characterCount > entry.contentPreview.length ? "..." : ""}
-                </p>
-                <div className="meta-row">
-                  <span>{entry.characterCount} characters</span>
-                  <span>Saved {formatDate(entry.createdAt)}</span>
+          filtered.map((entry) => {
+            const analytics = analyticsById[entry.id] ?? {
+              totalViews: 0,
+              uniqueViews: 0,
+              lastViewed: null
+            };
+
+            return (
+              <article className="card content-card" key={entry.id}>
+                <div className="resource-icon text-icon">
+                  <TextIcon />
                 </div>
-              </div>
-              <div className="card-actions">
-                <a className="icon-btn primary" href={`/texts/${entry.id}`} title="View text">
-                  <EyeIcon />
-                </a>
-                <button
-                  className="icon-btn"
-                  onClick={() => copyText(entry)}
-                  title="Copy text"
-                  type="button"
-                >
-                  <CopyIcon />
-                  <span className="sr-only">
-                    {copiedId === entry.id ? "Copied" : "Copy text"}
-                  </span>
-                </button>
-              </div>
-            </article>
-          ))
+                <div className="card-copy">
+                  <h4>{entry.title}</h4>
+                  <p>
+                    {entry.contentPreview}
+                    {entry.characterCount > entry.contentPreview.length ? "..." : ""}
+                  </p>
+                  <div className="meta-row">
+                    <span>{entry.characterCount} characters</span>
+                    <span>Saved {formatDate(entry.createdAt)}</span>
+                    <span title="Total views">
+                      <EyeIcon /> {analytics.totalViews} views
+                    </span>
+                    <span title="Unique visitors">
+                      <UserIcon /> {analytics.uniqueViews} unique visitors
+                    </span>
+                    <span>
+                      Last viewed{" "}
+                      {analytics.lastViewed ? formatDate(analytics.lastViewed) : "Never"}
+                    </span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <a className="icon-btn primary" href={`/texts/${entry.id}`} title="View text">
+                    <EyeIcon />
+                  </a>
+                  <button
+                    className="icon-btn"
+                    onClick={() => copyText(entry)}
+                    title="Copy text"
+                    type="button"
+                  >
+                    <CopyIcon />
+                    <span className="sr-only">
+                      {copiedId === entry.id ? "Copied" : "Copy text"}
+                    </span>
+                  </button>
+                </div>
+              </article>
+            );
+          })
         )}
       </div>
     </section>

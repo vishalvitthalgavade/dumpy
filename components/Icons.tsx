@@ -75,6 +75,15 @@ export function EyeIcon(props: IconProps) {
   );
 }
 
+export function UserIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M20 21a8 8 0 0 0-16 0" />
+      <circle cx="12" cy="7" r="4" />
+    </Svg>
+  );
+}
+
 export function CopyIcon(props: IconProps) {
   return (
     <Svg {...props}>

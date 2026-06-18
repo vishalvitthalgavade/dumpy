@@ -18,7 +18,13 @@ import {
 } from "@/components/Icons";
 import { SetupNotice } from "@/components/SetupNotice";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAnalyticsSummary } from "@/lib/analytics";
+import {
+  getAnalyticsSummary,
+  getPdfAnalyticsMap,
+  getTextAnalyticsMap,
+  getTopViewedPdfs,
+  getTopViewedTexts
+} from "@/lib/analytics";
 import { isAdmin } from "@/lib/auth";
 import { getMissingConfig } from "@/lib/config";
 import { getPdfs, getTextEntries } from "@/lib/db";
@@ -36,13 +42,33 @@ export default async function Admin() {
     redirect("/admin/login");
   }
 
-  const [pdfs, textEntries, analytics] = await Promise.all([
+  const [
+    pdfs,
+    textEntries,
+    analytics,
+    pdfAnalytics,
+    textAnalytics,
+    topPdfs,
+    topTexts
+  ] = await Promise.all([
     getPdfs(),
     getTextEntries(),
-    getAnalyticsSummary()
-  ]).catch(() => [null, null, null]);
+    getAnalyticsSummary(),
+    getPdfAnalyticsMap(),
+    getTextAnalyticsMap(),
+    getTopViewedPdfs(),
+    getTopViewedTexts()
+  ]).catch(() => [null, null, null, null, null, null, null]);
 
-  if (!pdfs || !textEntries || !analytics) {
+  if (
+    !pdfs ||
+    !textEntries ||
+    !analytics ||
+    !pdfAnalytics ||
+    !textAnalytics ||
+    !topPdfs ||
+    !topTexts
+  ) {
     return <DataNotice />;
   }
 
@@ -70,26 +96,90 @@ export default async function Admin() {
 
       <section className="analytics-grid" aria-label="Visitor analytics">
         <div className="stat-card">
-          <span>Total visits</span>
-          <strong>{analytics.totalVisits}</strong>
+          <span>Total Unique Visitors</span>
+          <strong>{analytics.totalVisitors}</strong>
         </div>
         <div className="stat-card">
-          <span>Unique visitors</span>
-          <strong>{analytics.uniqueVisitors}</strong>
+          <span>Today's Unique Visitors</span>
+          <strong>{analytics.todayVisitors}</strong>
         </div>
         <div className="stat-card">
-          <span>Today</span>
-          <strong>{analytics.todayVisits}</strong>
+          <span>Total Page Views</span>
+          <strong>{analytics.pageViews}</strong>
         </div>
         <div className="stat-card">
-          <span>This week</span>
-          <strong>{analytics.weekVisits}</strong>
-        </div>
-        <div className="stat-card">
-          <span>This month</span>
-          <strong>{analytics.monthVisits}</strong>
+          <span>Active Visitors</span>
+          <strong>{analytics.activeVisitors}</strong>
         </div>
       </section>
+
+      <div className="admin-grid">
+        <section className="panel dashboard-card">
+          <div className="section-title">
+            <div>
+              <p className="kicker">Analytics</p>
+              <h3>Top Viewed PDFs</h3>
+            </div>
+          </div>
+          <div className="pdf-list">
+            {topPdfs.length === 0 ? (
+              <div className="empty">
+                <FileIcon className="empty-icon" />
+                <strong>No PDF views yet</strong>
+                <span>Viewed PDFs will rank here.</span>
+              </div>
+            ) : (
+              topPdfs.map((item) => (
+                <article className="card mini-card" key={item.id}>
+                  <div className="card-copy">
+                    <h4>{item.title}</h4>
+                    <div className="meta-row">
+                      <span>
+                        <EyeIcon /> {item.totalViews} views
+                      </span>
+                      <span>
+                        {item.uniqueViews} unique visitors
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="panel dashboard-card">
+          <div className="section-title">
+            <div>
+              <p className="kicker">Analytics</p>
+              <h3>Top Viewed Text Entries</h3>
+            </div>
+          </div>
+          <div className="pdf-list">
+            {topTexts.length === 0 ? (
+              <div className="empty">
+                <TextIcon className="empty-icon" />
+                <strong>No text views yet</strong>
+                <span>Viewed text entries will rank here.</span>
+              </div>
+            ) : (
+              topTexts.map((item) => (
+                <article className="card mini-card" key={item.id}>
+                  <div className="card-copy">
+                    <h4>{item.title}</h4>
+                    <div className="meta-row">
+                      <span>
+                        <EyeIcon /> {item.totalViews} views
+                      </span>
+                      <span>{item.uniqueViews} unique visitors</span>
+                    </div>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
 
       <div className="admin-grid">
         <section className="panel dashboard-card">
@@ -193,6 +283,16 @@ export default async function Admin() {
                   <div className="meta-row">
                     <span>{formatBytes(pdf.sizeBytes)}</span>
                     <span>Uploaded {formatDate(pdf.createdAt)}</span>
+                    <span>
+                      <EyeIcon /> {(pdfAnalytics[pdf.id]?.totalViews ?? 0)} views
+                    </span>
+                    <span>{pdfAnalytics[pdf.id]?.uniqueViews ?? 0} unique visitors</span>
+                    <span>
+                      Last viewed{" "}
+                      {pdfAnalytics[pdf.id]?.lastViewed
+                        ? formatDate(pdfAnalytics[pdf.id].lastViewed)
+                        : "Never"}
+                    </span>
                   </div>
                 </div>
                 <div className="card-actions">
@@ -242,6 +342,16 @@ export default async function Admin() {
                   <div className="meta-row">
                     <span>{entry.characterCount} characters</span>
                     <span>Saved {formatDate(entry.createdAt)}</span>
+                    <span>
+                      <EyeIcon /> {(textAnalytics[entry.id]?.totalViews ?? 0)} views
+                    </span>
+                    <span>{textAnalytics[entry.id]?.uniqueViews ?? 0} unique visitors</span>
+                    <span>
+                      Last viewed{" "}
+                      {textAnalytics[entry.id]?.lastViewed
+                        ? formatDate(textAnalytics[entry.id].lastViewed)
+                        : "Never"}
+                    </span>
                   </div>
                 </div>
                 <div className="card-actions">

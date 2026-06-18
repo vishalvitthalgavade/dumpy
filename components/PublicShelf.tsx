@@ -1,11 +1,24 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CopyIcon, EyeIcon, FileIcon, SearchIcon } from "@/components/Icons";
+import {
+  CopyIcon,
+  EyeIcon,
+  FileIcon,
+  SearchIcon,
+  UserIcon
+} from "@/components/Icons";
+import type { ContentAnalytics } from "@/lib/analytics";
 import type { PdfItem } from "@/lib/db";
 import { formatBytes, formatDate } from "@/lib/format";
 
-export function PublicShelf({ pdfs }: { pdfs: PdfItem[] }) {
+export function PublicShelf({
+  analyticsById = {},
+  pdfs
+}: {
+  analyticsById?: Record<string, ContentAnalytics>;
+  pdfs: PdfItem[];
+}) {
   const [query, setQuery] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -60,40 +73,62 @@ export function PublicShelf({ pdfs }: { pdfs: PdfItem[] }) {
             </span>
           </div>
         ) : (
-          filtered.map((pdf) => (
-            <article className="card content-card" key={pdf.id}>
-              <div className="resource-icon pdf-icon">
-                <FileIcon />
-              </div>
-              <div className="card-copy">
-                <h4>{pdf.title}</h4>
-                <p>{pdf.fileName}</p>
-                <div className="meta-row">
-                  <span>{formatBytes(pdf.sizeBytes)}</span>
-                  <span>Uploaded {formatDate(pdf.createdAt)}</span>
+          filtered.map((pdf) => {
+            const analytics = analyticsById[pdf.id] ?? {
+              totalViews: 0,
+              uniqueViews: 0,
+              lastViewed: null
+            };
+
+            return (
+              <article className="card content-card" key={pdf.id}>
+                <div className="resource-icon pdf-icon">
+                  <FileIcon />
                 </div>
-              </div>
-              <div className="card-actions">
-                <a className="icon-btn primary" href={`/api/pdfs/${pdf.id}`} title="View PDF">
-                  <EyeIcon />
-                </a>
-                <button
-                  className="icon-btn"
-                  onClick={() => copyLink(pdf.id)}
-                  title="Copy link"
-                  type="button"
-                >
-                  <CopyIcon />
-                  <span className="sr-only">
-                    {copiedId === pdf.id ? "Copied" : "Copy link"}
-                  </span>
-                </button>
-                <a className="btn compact" href={`/api/pdfs/${pdf.id}?download=1`}>
-                  Download
-                </a>
-              </div>
-            </article>
-          ))
+                <div className="card-copy">
+                  <h4>{pdf.title}</h4>
+                  <p>{pdf.fileName}</p>
+                  <div className="meta-row">
+                    <span>{formatBytes(pdf.sizeBytes)}</span>
+                    <span>Uploaded {formatDate(pdf.createdAt)}</span>
+                    <span title="Total views">
+                      <EyeIcon /> {analytics.totalViews} views
+                    </span>
+                    <span title="Unique visitors">
+                      <UserIcon /> {analytics.uniqueViews} unique visitors
+                    </span>
+                    <span>
+                      Last viewed{" "}
+                      {analytics.lastViewed ? formatDate(analytics.lastViewed) : "Never"}
+                    </span>
+                  </div>
+                </div>
+                <div className="card-actions">
+                  <a
+                    className="icon-btn primary"
+                    href={`/api/pdfs/${pdf.id}`}
+                    title="View PDF"
+                  >
+                    <EyeIcon />
+                  </a>
+                  <button
+                    className="icon-btn"
+                    onClick={() => copyLink(pdf.id)}
+                    title="Copy link"
+                    type="button"
+                  >
+                    <CopyIcon />
+                    <span className="sr-only">
+                      {copiedId === pdf.id ? "Copied" : "Copy link"}
+                    </span>
+                  </button>
+                  <a className="btn compact" href={`/api/pdfs/${pdf.id}?download=1`}>
+                    Download
+                  </a>
+                </div>
+              </article>
+            );
+          })
         )}
       </div>
     </section>
