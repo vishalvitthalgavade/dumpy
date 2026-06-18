@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowIcon, FileIcon, SparkIcon, TextIcon } from "@/components/Icons";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { DataNotice } from "@/components/DataNotice";
 import { PublicShelf } from "@/components/PublicShelf";
 import { SetupNotice } from "@/components/SetupNotice";
@@ -26,6 +27,7 @@ export default async function Home() {
 
   return (
     <main className="shell">
+      <AnalyticsTracker path="/" />
       <header className="topbar">
         <div className="brand">
           <div className="mark">D</div>

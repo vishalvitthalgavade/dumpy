@@ -53,6 +53,31 @@ async function ensureSchema() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS visitor_identities (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      visitor_key TEXT NOT NULL UNIQUE,
+      ip_hash TEXT NOT NULL,
+      user_agent_hash TEXT NOT NULL,
+      session_id TEXT NOT NULL,
+      first_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      last_unique_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      unique_visit_count INTEGER NOT NULL DEFAULT 1
+    );
+
+    CREATE TABLE IF NOT EXISTS visitor_page_visits (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      visitor_id UUID NOT NULL REFERENCES visitor_identities(id) ON DELETE CASCADE,
+      path TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS visitor_page_visits_created_at_idx
+      ON visitor_page_visits (created_at);
+
+    CREATE INDEX IF NOT EXISTS visitor_page_visits_visitor_created_at_idx
+      ON visitor_page_visits (visitor_id, created_at);
+
     INSERT INTO notes (id, content)
     VALUES (1, '')
     ON CONFLICT (id) DO NOTHING;
@@ -66,6 +91,14 @@ async function ensureSchema() {
   `).then(() => undefined);
 
   await schemaPromise;
+}
+
+export async function queryDatabase<Row extends object = Record<string, unknown>>(
+  text: string,
+  values: unknown[] = []
+) {
+  await ensureSchema();
+  return getPool().query<Row>(text, values);
 }
 
 export type PdfItem = {

@@ -18,6 +18,7 @@ import {
 } from "@/components/Icons";
 import { SetupNotice } from "@/components/SetupNotice";
 import { SubmitButton } from "@/components/SubmitButton";
+import { getAnalyticsSummary } from "@/lib/analytics";
 import { isAdmin } from "@/lib/auth";
 import { getMissingConfig } from "@/lib/config";
 import { getPdfs, getTextEntries } from "@/lib/db";
@@ -35,12 +36,13 @@ export default async function Admin() {
     redirect("/admin/login");
   }
 
-  const [pdfs, textEntries] = await Promise.all([
+  const [pdfs, textEntries, analytics] = await Promise.all([
     getPdfs(),
-    getTextEntries()
-  ]).catch(() => [null, null]);
+    getTextEntries(),
+    getAnalyticsSummary()
+  ]).catch(() => [null, null, null]);
 
-  if (!pdfs || !textEntries) {
+  if (!pdfs || !textEntries || !analytics) {
     return <DataNotice />;
   }
 
@@ -65,6 +67,29 @@ export default async function Admin() {
           </form>
         </nav>
       </header>
+
+      <section className="analytics-grid" aria-label="Visitor analytics">
+        <div className="stat-card">
+          <span>Total visits</span>
+          <strong>{analytics.totalVisits}</strong>
+        </div>
+        <div className="stat-card">
+          <span>Unique visitors</span>
+          <strong>{analytics.uniqueVisitors}</strong>
+        </div>
+        <div className="stat-card">
+          <span>Today</span>
+          <strong>{analytics.todayVisits}</strong>
+        </div>
+        <div className="stat-card">
+          <span>This week</span>
+          <strong>{analytics.weekVisits}</strong>
+        </div>
+        <div className="stat-card">
+          <span>This month</span>
+          <strong>{analytics.monthVisits}</strong>
+        </div>
+      </section>
 
       <div className="admin-grid">
         <section className="panel dashboard-card">

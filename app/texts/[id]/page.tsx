@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { DataNotice } from "@/components/DataNotice";
 import { TextIcon } from "@/components/Icons";
 import { SetupNotice } from "@/components/SetupNotice";
@@ -32,6 +33,7 @@ export default async function TextView({
 
   return (
     <main className="shell">
+      <AnalyticsTracker path={`/texts/${entry.id}`} />
       <header className="topbar">
         <div className="brand">
           <div className="mark">D</div>
