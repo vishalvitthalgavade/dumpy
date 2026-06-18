@@ -100,11 +100,17 @@ export default async function Admin() {
           <strong>{analytics.totalVisitors}</strong>
         </div>
         <div className="stat-card">
-          <span>Today's Unique Visitors</span>
+          <span>Today's Visitors</span>
           <strong>{analytics.todayVisitors}</strong>
         </div>
         <div className="stat-card">
-          <span>Total Page Views</span>
+          <span>Unique Content Views</span>
+          <strong>{analytics.uniqueContentViews}</strong>
+        </div>
+        <div className="stat-card">
+          <span title="Page Views count page visits after duplicate filtering.">
+            Total Page Views
+          </span>
           <strong>{analytics.pageViews}</strong>
         </div>
         <div className="stat-card">

@@ -81,6 +81,12 @@ async function ensureSchema() {
     CREATE INDEX IF NOT EXISTS visitor_page_visits_path_idx
       ON visitor_page_visits (path);
 
+    CREATE INDEX IF NOT EXISTS idx_visits_visitor_path
+      ON visitor_page_visits (visitor_id, path);
+
+    CREATE INDEX IF NOT EXISTS idx_visits_created_at
+      ON visitor_page_visits (created_at);
+
     CREATE INDEX IF NOT EXISTS visitor_page_visits_visitor_created_at_idx
       ON visitor_page_visits (visitor_id, created_at);
 

@@ -10,6 +10,7 @@ export type AnalyticsSummary = {
   totalVisitors: number;
   todayVisitors: number;
   activeVisitors: number;
+  uniqueContentViews: number;
   pageViews: number;
 };
 
@@ -106,11 +107,29 @@ export async function trackPublicVisit(path: string) {
     return;
   }
 
-  await queryDatabase(
+  const insertVisit = await queryDatabase<{ id: string }>(
     `INSERT INTO visitor_page_visits (visitor_id, path)
-     VALUES ($1, $2)`,
-    [visitorId, path]
+     SELECT $1, $2
+     WHERE NOT EXISTS (
+       SELECT 1
+       FROM visitor_page_visits
+       WHERE visitor_id = $1
+         AND path = $2
+         AND created_at > NOW() - ($3::interval)
+     )
+     RETURNING id`,
+    [visitorId, path, `${UNIQUE_WINDOW_MINUTES} minutes`]
   );
+
+  const duplicateDetected = insertVisit.rows.length === 0;
+  console.log("[analytics]", {
+    visitor_id: visitorId,
+    path,
+    created_at: new Date().toISOString(),
+    duplicate_detected: duplicateDetected
+  });
+
+  return;
 }
 
 export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
@@ -118,15 +137,19 @@ export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
     total_visitors: string;
     today_visitors: string;
     active_visitors: string;
+    unique_content_views: string;
     page_views: string;
   }>(
     `SELECT
        (SELECT COUNT(DISTINCT visitor_id) FROM visitor_page_visits) AS total_visitors,
        (SELECT COUNT(DISTINCT visitor_id) FROM visitor_page_visits
-        WHERE created_at >= date_trunc('day', NOW() AT TIME ZONE 'Asia/Kolkata')
-          AT TIME ZONE 'Asia/Kolkata') AS today_visitors,
+        WHERE created_at >= CURRENT_DATE) AS today_visitors,
        (SELECT COUNT(DISTINCT visitor_id) FROM visitor_page_visits
         WHERE created_at >= NOW() - INTERVAL '5 minutes') AS active_visitors,
+       (SELECT COUNT(*) FROM (
+          SELECT DISTINCT visitor_id, path
+          FROM visitor_page_visits
+        ) unique_views) AS unique_content_views,
        (SELECT COUNT(*) FROM visitor_page_visits
        ) AS page_views`
   );
@@ -137,6 +160,7 @@ export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
     totalVisitors: Number(row?.total_visitors ?? 0),
     todayVisitors: Number(row?.today_visitors ?? 0),
     activeVisitors: Number(row?.active_visitors ?? 0),
+    uniqueContentViews: Number(row?.unique_content_views ?? 0),
     pageViews: Number(row?.page_views ?? 0)
   };
 }
