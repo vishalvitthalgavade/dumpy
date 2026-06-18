@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { trackPublicVisit } from "@/lib/analytics";
 import { getPdfFile } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,10 @@ export async function GET(
   const disposition = request.nextUrl.searchParams.has("download")
     ? "attachment"
     : "inline";
+  const analyticsPath =
+    disposition === "attachment" ? `/api/pdfs/${id}?download=1` : `/api/pdfs/${id}`;
+
+  await trackPublicVisit(analyticsPath);
 
   return new NextResponse(pdf.data, {
     headers: {
