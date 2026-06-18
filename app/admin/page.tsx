@@ -8,7 +8,16 @@ import {
   uploadPdfAction
 } from "@/app/actions";
 import { DataNotice } from "@/components/DataNotice";
+import {
+  EditIcon,
+  EyeIcon,
+  FileIcon,
+  TextIcon,
+  TrashIcon,
+  UploadIcon
+} from "@/components/Icons";
 import { SetupNotice } from "@/components/SetupNotice";
+import { SubmitButton } from "@/components/SubmitButton";
 import { isAdmin } from "@/lib/auth";
 import { getMissingConfig } from "@/lib/config";
 import { getPdfs, getTextEntries } from "@/lib/db";
@@ -42,7 +51,7 @@ export default async function Admin() {
           <div className="mark">D</div>
           <div>
             <h1>Admin Yard</h1>
-            <p>Upload, write what everyone else can view.</p>
+            <p>Manage public content</p>
           </div>
         </div>
         <nav className="nav">
@@ -58,8 +67,16 @@ export default async function Admin() {
       </header>
 
       <div className="admin-grid">
-        <section className="panel">
-          <h3>Upload PDF</h3>
+        <section className="panel dashboard-card">
+          <div className="panel-heading">
+            <div className="resource-icon pdf-icon">
+              <UploadIcon />
+            </div>
+            <div>
+              <p className="kicker">Files</p>
+              <h3>Upload PDF</h3>
+            </div>
+          </div>
           <form action={uploadPdfAction} className="form">
             <label className="field">
               <span>Title</span>
@@ -70,8 +87,10 @@ export default async function Admin() {
                 type="text"
               />
             </label>
-            <label className="field">
-              <span>PDF file</span>
+            <label className="dropzone">
+              <UploadIcon />
+              <strong>Drop a PDF here or browse</strong>
+              <span>Maximum upload size is 10 MB.</span>
               <input
                 accept="application/pdf"
                 className="file-input"
@@ -80,14 +99,22 @@ export default async function Admin() {
                 type="file"
               />
             </label>
-            <button className="btn primary" type="submit">
+            <SubmitButton pendingLabel="Uploading...">
               Upload PDF
-            </button>
+            </SubmitButton>
           </form>
         </section>
 
-        <section className="panel">
-          <h3>Save Text</h3>
+        <section className="panel dashboard-card">
+          <div className="panel-heading">
+            <div className="resource-icon text-icon">
+              <TextIcon />
+            </div>
+            <div>
+              <p className="kicker">Notes</p>
+              <h3>Save Text</h3>
+            </div>
+          </div>
           <form action={createTextAction} className="form">
             <label className="field">
               <span>Headline</span>
@@ -108,40 +135,49 @@ export default async function Admin() {
                 required
               />
             </label>
-            <button className="btn primary" type="submit">
+            <SubmitButton pendingLabel="Saving...">
               Save Text
-            </button>
+            </SubmitButton>
           </form>
         </section>
       </div>
 
-      <section style={{ marginTop: 18 }}>
+      <section className="management-section">
         <div className="section-title">
-          <h3>Manage PDFs</h3>
+          <div>
+            <p className="kicker">Content</p>
+            <h3>Manage PDFs</h3>
+          </div>
           <span className="muted">{pdfs.length} stored</span>
         </div>
         <div className="pdf-list">
           {pdfs.length === 0 ? (
-            <div className="empty">No PDFs to manage yet.</div>
+            <div className="empty">
+              <FileIcon className="empty-icon" />
+              <strong>No PDFs to manage yet</strong>
+              <span>New uploads will show here immediately.</span>
+            </div>
           ) : (
             pdfs.map((pdf) => (
-              <article className="card" key={pdf.id}>
-                <div className="pdf-icon">PDF</div>
-                <div>
+              <article className="card content-card" key={pdf.id}>
+                <div className="resource-icon pdf-icon">
+                  <FileIcon />
+                </div>
+                <div className="card-copy">
                   <h4>{pdf.title}</h4>
-                  <p>
-                    {formatBytes(pdf.sizeBytes)} - Uploaded{" "}
-                    {formatDate(pdf.createdAt)}
-                  </p>
+                  <div className="meta-row">
+                    <span>{formatBytes(pdf.sizeBytes)}</span>
+                    <span>Uploaded {formatDate(pdf.createdAt)}</span>
+                  </div>
                 </div>
                 <div className="card-actions">
-                  <a className="btn" href={`/api/pdfs/${pdf.id}`}>
-                    View
+                  <a className="icon-btn" href={`/api/pdfs/${pdf.id}`} title="View PDF">
+                    <EyeIcon />
                   </a>
                   <form action={deletePdfAction}>
                     <input name="id" type="hidden" value={pdf.id} />
-                    <button className="btn danger" type="submit">
-                      Delete
+                    <button className="icon-btn danger" title="Delete PDF" type="submit">
+                      <TrashIcon />
                     </button>
                   </form>
                 </div>
@@ -151,37 +187,53 @@ export default async function Admin() {
         </div>
       </section>
 
-      <section style={{ marginTop: 18 }}>
+      <section className="management-section">
         <div className="section-title">
-          <h3>Manage Texts</h3>
+          <div>
+            <p className="kicker">Content</p>
+            <h3>Manage Texts</h3>
+          </div>
           <span className="muted">{textEntries.length} saved</span>
         </div>
         <div className="pdf-list">
           {textEntries.length === 0 ? (
-            <div className="empty">No text entries to manage yet.</div>
+            <div className="empty">
+              <TextIcon className="empty-icon" />
+              <strong>No text entries to manage yet</strong>
+              <span>Saved entries will appear here for editing and deletion.</span>
+            </div>
           ) : (
             textEntries.map((entry) => (
-              <article className="card" key={entry.id}>
-                <div className="text-icon">TXT</div>
-                <div>
+              <article className="card content-card" key={entry.id}>
+                <div className="resource-icon text-icon">
+                  <TextIcon />
+                </div>
+                <div className="card-copy">
                   <h4>{entry.title}</h4>
                   <p>
                     {entry.contentPreview.slice(0, 110)}
-                    {entry.characterCount > 110 ? "..." : ""} - Saved{" "}
-                    {formatDate(entry.createdAt)}
+                    {entry.characterCount > 110 ? "..." : ""}
                   </p>
+                  <div className="meta-row">
+                    <span>{entry.characterCount} characters</span>
+                    <span>Saved {formatDate(entry.createdAt)}</span>
+                  </div>
                 </div>
                 <div className="card-actions">
-                  <Link className="btn" href={`/texts/${entry.id}`}>
-                    View
+                  <Link className="icon-btn" href={`/texts/${entry.id}`} title="View text">
+                    <EyeIcon />
                   </Link>
-                  <Link className="btn" href={`/admin/texts/${entry.id}/edit`}>
-                    Edit
+                  <Link
+                    className="icon-btn"
+                    href={`/admin/texts/${entry.id}/edit`}
+                    title="Edit text"
+                  >
+                    <EditIcon />
                   </Link>
                   <form action={deleteTextAction}>
                     <input name="id" type="hidden" value={entry.id} />
-                    <button className="btn danger" type="submit">
-                      Delete
+                    <button className="icon-btn danger" title="Delete text" type="submit">
+                      <TrashIcon />
                     </button>
                   </form>
                 </div>

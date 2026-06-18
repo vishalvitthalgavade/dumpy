@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { CopyIcon, EyeIcon, FileIcon, SearchIcon } from "@/components/Icons";
 import type { PdfItem } from "@/lib/db";
 import { formatBytes, formatDate } from "@/lib/format";
 
@@ -29,16 +30,17 @@ export function PublicShelf({ pdfs }: { pdfs: PdfItem[] }) {
   return (
     <section className="shelf-section">
       <div className="section-title">
-        <h3>
-          <span>PDF</span> Shelf
-        </h3>
+        <div>
+          <p className="kicker">Library</p>
+          <h3>PDF Shelf</h3>
+        </div>
         <span className="muted">{filtered.length} available</span>
       </div>
 
-      <label className="field shelf-search">
-        <span>Search PDFs</span>
+      <label className="search-field shelf-search">
+        <SearchIcon />
+        <span className="sr-only">Search PDFs</span>
         <input
-          className="input"
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Type a title or filename"
           type="search"
@@ -49,33 +51,44 @@ export function PublicShelf({ pdfs }: { pdfs: PdfItem[] }) {
       <div className="pdf-list">
         {filtered.length === 0 ? (
           <div className="empty">
-            {pdfs.length === 0
-              ? "No PDFs have been uploaded yet."
-              : "No PDFs match that search."}
+            <FileIcon className="empty-icon" />
+            <strong>{pdfs.length === 0 ? "No PDFs yet" : "No matches found"}</strong>
+            <span>
+              {pdfs.length === 0
+                ? "Uploaded files will appear here with their size and time."
+                : "Try a different title or filename."}
+            </span>
           </div>
         ) : (
           filtered.map((pdf) => (
-            <article className="card" key={pdf.id}>
-              <div className="pdf-icon">PDF</div>
-              <div>
+            <article className="card content-card" key={pdf.id}>
+              <div className="resource-icon pdf-icon">
+                <FileIcon />
+              </div>
+              <div className="card-copy">
                 <h4>{pdf.title}</h4>
-                <p>
-                  {formatBytes(pdf.sizeBytes)} - Uploaded{" "}
-                  {formatDate(pdf.createdAt)}
-                </p>
+                <p>{pdf.fileName}</p>
+                <div className="meta-row">
+                  <span>{formatBytes(pdf.sizeBytes)}</span>
+                  <span>Uploaded {formatDate(pdf.createdAt)}</span>
+                </div>
               </div>
               <div className="card-actions">
-                <a className="btn primary" href={`/api/pdfs/${pdf.id}`}>
-                  View
+                <a className="icon-btn primary" href={`/api/pdfs/${pdf.id}`} title="View PDF">
+                  <EyeIcon />
                 </a>
                 <button
-                  className="btn"
+                  className="icon-btn"
                   onClick={() => copyLink(pdf.id)}
+                  title="Copy link"
                   type="button"
                 >
-                  {copiedId === pdf.id ? "Copied" : "Copy"}
+                  <CopyIcon />
+                  <span className="sr-only">
+                    {copiedId === pdf.id ? "Copied" : "Copy link"}
+                  </span>
                 </button>
-                <a className="btn" href={`/api/pdfs/${pdf.id}?download=1`}>
+                <a className="btn compact" href={`/api/pdfs/${pdf.id}?download=1`}>
                   Download
                 </a>
               </div>

@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { updateTextAction } from "@/app/actions";
 import { DataNotice } from "@/components/DataNotice";
+import { EditIcon, EyeIcon, TextIcon } from "@/components/Icons";
 import { SetupNotice } from "@/components/SetupNotice";
+import { SubmitButton } from "@/components/SubmitButton";
 import { isAdmin } from "@/lib/auth";
 import { getMissingConfig } from "@/lib/config";
 import { getTextEntry } from "@/lib/db";
@@ -53,6 +55,7 @@ export default async function EditText({
             Admin
           </Link>
           <Link className="btn" href={`/texts/${entry.id}`}>
+            <EyeIcon />
             View
           </Link>
         </nav>
@@ -60,8 +63,17 @@ export default async function EditText({
 
       <section className="panel edit-panel">
         {updated === "1" ? (
-          <div className="notice">Text updated successfully.</div>
+          <div className="toast">Text updated successfully.</div>
         ) : null}
+        <div className="panel-heading">
+          <div className="resource-icon text-icon">
+            <EditIcon />
+          </div>
+          <div>
+            <p className="kicker">Editor</p>
+            <h3>Refine saved text</h3>
+          </div>
+        </div>
         <form action={updateTextAction} className="form">
           <input name="id" type="hidden" value={entry.id} />
           <label className="field">
@@ -84,9 +96,10 @@ export default async function EditText({
             />
           </label>
           <div className="form-actions">
-            <button className="btn primary" type="submit">
+            <SubmitButton pendingLabel="Saving...">
+              <TextIcon />
               Save Changes
-            </button>
+            </SubmitButton>
             <Link className="btn" href="/admin">
               Cancel
             </Link>

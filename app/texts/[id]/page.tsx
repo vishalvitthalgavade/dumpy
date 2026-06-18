@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DataNotice } from "@/components/DataNotice";
+import { TextIcon } from "@/components/Icons";
 import { SetupNotice } from "@/components/SetupNotice";
 import { getMissingConfig } from "@/lib/config";
 import { getTextEntry } from "@/lib/db";
@@ -50,6 +51,12 @@ export default async function TextView({
       </header>
 
       <article className="text-document">
+        <div className="document-meta">
+          <div className="resource-icon text-icon">
+            <TextIcon />
+          </div>
+          <span>Saved {formatDate(entry.createdAt)}</span>
+        </div>
         <h2>{entry.title}</h2>
         <div className="note-body">{entry.content}</div>
       </article>

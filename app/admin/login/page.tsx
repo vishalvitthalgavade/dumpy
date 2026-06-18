@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { loginAction } from "@/app/actions";
+import { SparkIcon } from "@/components/Icons";
 import { SetupNotice } from "@/components/SetupNotice";
+import { SubmitButton } from "@/components/SubmitButton";
 import { isAdmin } from "@/lib/auth";
 import { getMissingConfig } from "@/lib/config";
 
@@ -25,17 +27,21 @@ export default async function Login({
 
   return (
     <main className="login">
-      <section className="panel">
-        <div className="brand" style={{ marginBottom: 22 }}>
+      <section className="panel auth-card">
+        <div className="brand auth-brand">
           <div className="mark">D</div>
           <div>
             <h1>Dumpyard</h1>
-            <p>Admin login</p>
+            <p>Admin access</p>
           </div>
+        </div>
+        <div className="eyebrow">
+          <SparkIcon />
+          Private dashboard
         </div>
 
         {params.error ? (
-          <p className="notice">That password did not match.</p>
+          <p className="toast error">That password did not match.</p>
         ) : null}
 
         <form action={loginAction} className="form">
@@ -50,9 +56,9 @@ export default async function Login({
               type="password"
             />
           </label>
-          <button className="btn primary" type="submit">
+          <SubmitButton pendingLabel="Checking...">
             Enter Admin
-          </button>
+          </SubmitButton>
           <Link className="btn" href="/">
             Back to public view
           </Link>
