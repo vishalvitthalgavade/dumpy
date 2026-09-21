@@ -104,7 +104,7 @@ export function PublicShelf({
                       <a
                         className="icon-btn primary"
                         href={`/api/files/${pdf.id}`}
-                        title="View PDF"
+                        title="Open file"
                       >
                         <EyeIcon />
                       </a>

@@ -11,7 +11,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const url = new URL(request.url);
   const download = url.searchParams.get("download") === "1";
-  await trackPublicVisit(`/api/files/${id}${download ? "?download=1" : ""}`);
+  // Analytics must never prevent a public file from being served.
+  try {
+    await trackPublicVisit(`/api/files/${id}${download ? "?download=1" : ""}`);
+  } catch (error) {
+    console.error("[analytics] file view tracking failed", error);
+  }
 
   return new NextResponse(file.data, {
     headers: {

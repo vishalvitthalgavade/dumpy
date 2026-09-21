@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Dumpyard",
-  description: "A public shelf for PDFs and saved text."
+  description: "A public file shelf for documents, archives, media, code, and saved text."
 };
 
 export default function RootLayout({
