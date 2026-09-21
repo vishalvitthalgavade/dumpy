@@ -4,16 +4,16 @@ import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { PublicShelf } from "@/components/PublicShelf";
 import { TextShelf } from "@/components/TextShelf";
 import { AnimatedCounter, MotionCard, MotionPress } from "@/components/MotionPrimitives";
-import { getFiles, getTextEntries } from "@/lib/db";
+import { getFiles, getTextEntries, type StoredFile, type TextEntry } from "@/lib/db";
 import { getFileAnalyticsMap, getTextAnalyticsMap } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  let pdfs = [];
-  let textEntries = [];
-  let pdfAnalytics = {};
-  let textAnalytics = {};
+  let pdfs: StoredFile[] = [];
+  let textEntries: TextEntry[] = [];
+  let pdfAnalytics: Awaited<ReturnType<typeof getFileAnalyticsMap>> = {};
+  let textAnalytics: Awaited<ReturnType<typeof getTextAnalyticsMap>> = {};
 
   try {
     [pdfs, textEntries, pdfAnalytics, textAnalytics] = await Promise.all([
