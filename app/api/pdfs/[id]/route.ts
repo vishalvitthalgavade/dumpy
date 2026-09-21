@@ -1,0 +1,36 @@
+import { NextRequest, NextResponse } from "next/server";
+import { trackPublicVisit } from "@/lib/analytics";
+import { getPdfFile } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const pdf = await getPdfFile(id);
+
+  if (!pdf) {
+    return new NextResponse("PDF not found.", { status: 404 });
+  }
+
+  const disposition = request.nextUrl.searchParams.has("download")
+    ? "attachment"
+    : "inline";
+  const analyticsPath =
+    disposition === "attachment" ? `/api/pdfs/${id}?download=1` : `/api/pdfs/${id}`;
+
+  await trackPublicVisit(analyticsPath);
+
+  return new NextResponse(pdf.data, {
+    headers: {
+      "Content-Type": pdf.mime_type,
+      "Content-Length": String(pdf.data.length),
+      "Content-Disposition": `${disposition}; filename="${encodeURIComponent(
+        pdf.file_name
+      )}"`,
+      "Cache-Control": "public, max-age=60"
+    }
+  });
+}
