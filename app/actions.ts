@@ -13,10 +13,18 @@ import {
   createTextEntry,
   deleteFile,
   deleteTextEntry,
+  updateFileTitle,
   updateTextEntry
 } from "@/lib/db";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+// Strips a trailing extension for use as a default title, but leaves
+// dotfiles like ".gitignore" alone instead of collapsing them to "".
+function titleFromFileName(fileName: string) {
+  const lastDot = fileName.lastIndexOf(".");
+  return lastDot > 0 ? fileName.slice(0, lastDot) : fileName;
+}
 
 export async function loginAction(formData: FormData) {
   const password = String(formData.get("password") ?? "");
@@ -66,7 +74,7 @@ export async function uploadFileAction(formData: FormData) {
   const buffer = Buffer.from(await file.arrayBuffer());
 
   await createFile({
-    title: title || file.name.replace(/\.[^.]+$/, ""),
+    title: title || titleFromFileName(file.name),
     fileName: file.name,
     mimeType: file.type,
     sizeBytes: file.size,
@@ -133,6 +141,28 @@ export async function deleteTextAction(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/admin");
+}
+
+export async function updateFileAction(formData: FormData) {
+  try {
+    await requireAdmin();
+  } catch {
+    redirect("/admin/login");
+  }
+
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+
+  if (!id || !title) {
+    throw new Error("A title is required.");
+  }
+
+  await updateFileTitle(id, title);
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath(`/admin/files/${id}/edit`);
+  redirect(`/admin/files/${id}/edit?updated=1`);
 }
 
 export async function deleteFileAction(formData: FormData) {

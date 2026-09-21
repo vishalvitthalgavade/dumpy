@@ -154,6 +154,26 @@ export async function getFiles(): Promise<StoredFile[]> {
   }));
 }
 
+export async function getFileMeta(id: string): Promise<StoredFile | null> {
+  await ensureSchema();
+  const result = await getPool().query<{
+    id: string; title: string; file_name: string; mime_type: string;
+    size_bytes: number; created_at: Date;
+  }>(
+    `SELECT id, title, file_name, mime_type, size_bytes, created_at
+     FROM stored_files WHERE id = $1`,
+    [id]
+  );
+  const row = result.rows[0];
+  if (!row) {
+    return null;
+  }
+  return {
+    id: row.id, title: row.title, fileName: row.file_name, mimeType: row.mime_type,
+    sizeBytes: row.size_bytes, createdAt: row.created_at.toISOString()
+  };
+}
+
 export async function getFile(id: string) {
   await ensureSchema();
   const result = await getPool().query<{
@@ -177,6 +197,22 @@ export async function createFile(input: {
 export async function deleteFile(id: string) {
   await ensureSchema();
   await getPool().query('DELETE FROM stored_files WHERE id = $1', [id]);
+}
+
+export async function updateFileTitle(id: string, title: string) {
+  await ensureSchema();
+  await getPool().query(
+    `UPDATE stored_files SET title = $2 WHERE id = $1`,
+    [id, title]
+  );
+}
+
+export async function getTotalStorageBytes(): Promise<number> {
+  await ensureSchema();
+  const result = await getPool().query<{ total: string | null }>(
+    `SELECT SUM(size_bytes)::bigint AS total FROM stored_files`
+  );
+  return Number(result.rows[0]?.total ?? 0);
 }
 
 export type PdfItem = {
