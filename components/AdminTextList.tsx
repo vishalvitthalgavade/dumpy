@@ -73,15 +73,15 @@ export function AdminTextList({
                 </div>
               </div>
               <div className="card-actions">
-                <Link className="icon-btn" href={`/texts/${entry.id}`} title="View text">
+                <Link aria-label="View text" className="icon-btn" href={`/texts/${entry.id}`} title="View text">
                   <EyeIcon />
                 </Link>
-                <Link className="icon-btn" href={`/admin/texts/${entry.id}/edit`} title="Edit text">
+                <Link aria-label="Edit text" className="icon-btn" href={`/admin/texts/${entry.id}/edit`} title="Edit text">
                   <EditIcon />
                 </Link>
                 <form action={deleteAction}>
                   <input name="id" type="hidden" value={entry.id} />
-                  <button className="icon-btn danger" title="Delete text" type="submit">
+                  <button aria-label="Delete text" className="icon-btn danger" title="Delete text" type="submit">
                     <TrashIcon />
                   </button>
                 </form>

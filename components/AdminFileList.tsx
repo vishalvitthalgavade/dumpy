@@ -75,10 +75,10 @@ export function AdminFileList({
                 </div>
               </div>
               <div className="card-actions">
-                <a className="icon-btn primary" href={`/api/files/${file.id}`} title="Open file">
+                <a aria-label="Open file" className="icon-btn primary" href={`/api/files/${file.id}`} title="Open file">
                   <EyeIcon />
                 </a>
-                <Link className="icon-btn" href={`/admin/files/${file.id}/edit`} title="Rename file">
+                <Link aria-label="Rename file" className="icon-btn" href={`/admin/files/${file.id}/edit`} title="Rename file">
                   <EditIcon />
                 </Link>
                 <a className="btn compact" href={`/api/files/${file.id}?download=1`}>
@@ -86,7 +86,7 @@ export function AdminFileList({
                 </a>
                 <form action={deleteAction}>
                   <input name="id" type="hidden" value={file.id} />
-                  <button className="icon-btn danger" title="Delete file" type="submit">
+                  <button aria-label="Delete file" className="icon-btn danger" title="Delete file" type="submit">
                     <TrashIcon />
                   </button>
                 </form>

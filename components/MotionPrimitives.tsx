@@ -13,8 +13,8 @@ import {
 export const premiumEase = [0.22, 1, 0.36, 1] as const;
 export const springTransition = {
   type: "spring",
-  stiffness: 400,
-  damping: 30
+  stiffness: 420,
+  damping: 34
 } as const;
 
 export function MotionRoot({ children }: { children: React.ReactNode }) {
@@ -26,10 +26,9 @@ export function PageMotion({ children }: { children: React.ReactNode }) {
 
   return (
     <m.div
-      initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+      initial={reducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: premiumEase }}
-      style={{ willChange: "opacity, transform" }}
+      transition={{ duration: 0.28, ease: premiumEase }}
     >
       {children}
     </m.div>
@@ -49,24 +48,16 @@ export function MotionCard({
   delay?: number;
   title?: string;
 }) {
+  const reducedMotion = useReducedMotion();
   const Component = m[as];
 
   return (
     <Component
       className={className}
-      layout
-      initial={{ opacity: 0, y: 10 }}
+      initial={reducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 6, scale: 0.98 }}
-      whileHover={{ scale: 1.02, y: -2 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{
-        ...springTransition,
-        layout: { duration: 0.25, ease: premiumEase },
-        opacity: { duration: 0.2, delay },
-        y: { duration: 0.2, delay }
-      }}
-      style={{ willChange: "opacity, transform" }}
+      exit={reducedMotion ? undefined : { opacity: 0, y: 6 }}
+      transition={{ duration: 0.22, ease: premiumEase, delay: reducedMotion ? 0 : delay }}
       title={title}
     >
       {children}
@@ -85,13 +76,15 @@ export function MotionPress({
   children: React.ReactNode;
   className?: string;
 }) {
+  const reducedMotion = useReducedMotion();
+
   return (
     <m.span
       className={className}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={reducedMotion ? undefined : { y: -1 }}
+      whileTap={reducedMotion ? undefined : { scale: 0.985 }}
       transition={springTransition}
-      style={{ display: "inline-flex", willChange: "transform" }}
+      style={{ display: "inline-flex" }}
     >
       {children}
     </m.span>
@@ -107,16 +100,22 @@ export function AnimatedCounter({
 }) {
   const ref = useRef<HTMLSpanElement | null>(null);
   const isInView = useInView(ref, { once: true, margin: "-10% 0px" });
-  const [displayValue, setDisplayValue] = useState(0);
+  const reducedMotion = useReducedMotion();
+  const [displayValue, setDisplayValue] = useState(reducedMotion ? value : 0);
 
   useEffect(() => {
+    if (reducedMotion) {
+      setDisplayValue(value);
+      return;
+    }
+
     if (!isInView) {
       return;
     }
 
     let frame = 0;
     let start: number | null = null;
-    const duration = 650;
+    const duration = 520;
 
     function animate(timestamp: number) {
       start ??= timestamp;
@@ -131,7 +130,7 @@ export function AnimatedCounter({
 
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
-  }, [isInView, value]);
+  }, [isInView, reducedMotion, value]);
 
   return <span ref={ref}>{formatter(displayValue)}</span>;
 }
