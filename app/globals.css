@@ -315,6 +315,12 @@ button {
   color: var(--danger);
 }
 
+.icon-btn.copied,
+.btn.copied {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #10b981;
+}
+
 .icon {
   width: 18px;
   height: 18px;
@@ -416,6 +422,9 @@ button {
 }
 
 .stat-card span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: var(--muted);
   font-weight: 740;
 }
@@ -430,7 +439,7 @@ button {
 
 .analytics-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -472,6 +481,35 @@ button {
 
 .shelf-search {
   margin-bottom: 14px;
+}
+
+.shelf-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.shelf-toolbar .search-field {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.sort-select {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 0 14px;
+  background: var(--field-bg);
+  color: var(--text);
+  font-weight: 640;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.sort-select:focus-visible {
+  outline: 0;
+  border-color: rgba(20, 184, 166, 0.5);
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.12);
 }
 
 .search-field {
@@ -738,6 +776,12 @@ button {
   font-size: clamp(2rem, 6vw, 4.2rem);
   line-height: 1;
   letter-spacing: 0;
+}
+
+.document-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
 }
 
 .note-body {

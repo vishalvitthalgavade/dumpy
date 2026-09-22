@@ -1,11 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CopyIcon, EyeIcon, SearchIcon, TextIcon } from "@/components/Icons";
+import {
+  CheckIcon,
+  CopyIcon,
+  EyeIcon,
+  SearchIcon,
+  TextIcon
+} from "@/components/Icons";
 import { MotionCard, MotionList, MotionPress } from "@/components/MotionPrimitives";
 import type { ContentAnalytics } from "@/lib/analytics";
 import type { TextEntry } from "@/lib/db";
 import { formatShortDate } from "@/lib/format";
+
+type SortOrder = "newest" | "oldest" | "views";
 
 export function TextShelf({
   analyticsById = {},
@@ -16,17 +24,34 @@ export function TextShelf({
 }) {
   const [query, setQuery] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   const filtered = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase();
-    if (!cleanQuery) {
-      return entries;
-    }
+    const matches = !cleanQuery
+      ? entries
+      : entries.filter((entry) =>
+          `${entry.title} ${entry.contentPreview}`.toLowerCase().includes(cleanQuery)
+        );
 
-    return entries.filter((entry) =>
-      `${entry.title} ${entry.contentPreview}`.toLowerCase().includes(cleanQuery)
-    );
-  }, [entries, query]);
+    const sorted = [...matches];
+    if (sortOrder === "oldest") {
+      sorted.sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    } else if (sortOrder === "views") {
+      sorted.sort(
+        (a, b) =>
+          (analyticsById[b.id]?.totalViews ?? 0) -
+          (analyticsById[a.id]?.totalViews ?? 0)
+      );
+    } else {
+      sorted.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    }
+    return sorted;
+  }, [entries, query, sortOrder, analyticsById]);
 
   async function copyText(entry: TextEntry) {
     await navigator.clipboard.writeText(entry.content);
@@ -44,16 +69,28 @@ export function TextShelf({
         <span className="muted">{filtered.length} saved</span>
       </div>
 
-      <label className="search-field shelf-search">
-        <SearchIcon />
-        <span className="sr-only">Search text</span>
-        <input
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Type a headline or phrase"
-          type="search"
-          value={query}
-        />
-      </label>
+      <div className="shelf-toolbar">
+        <label className="search-field">
+          <SearchIcon />
+          <span className="sr-only">Search text</span>
+          <input
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Type a headline or phrase"
+            type="search"
+            value={query}
+          />
+        </label>
+        <select
+          aria-label="Sort text entries"
+          className="sort-select"
+          onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+          value={sortOrder}
+        >
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="views">Most viewed</option>
+        </select>
+      </div>
 
       <div className="pdf-list">
         {filtered.length === 0 ? (
@@ -112,12 +149,14 @@ export function TextShelf({
                     </MotionPress>
                     <MotionPress>
                       <button
-                        className="icon-btn"
+                        className={
+                          copiedId === entry.id ? "icon-btn copied" : "icon-btn"
+                        }
                         onClick={() => copyText(entry)}
-                        title="Copy text"
+                        title={copiedId === entry.id ? "Copied" : "Copy text"}
                         type="button"
                       >
-                        <CopyIcon />
+                        {copiedId === entry.id ? <CheckIcon /> : <CopyIcon />}
                         <span className="sr-only">
                           {copiedId === entry.id ? "Copied" : "Copy text"}
                         </span>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import { CopyTextButton } from "@/components/CopyTextButton";
 import { DataNotice } from "@/components/DataNotice";
 import { EyeIcon, TextIcon, UserIcon } from "@/components/Icons";
 import { SetupNotice } from "@/components/SetupNotice";
@@ -69,6 +70,14 @@ export default async function TextView({
           </span>
         </div>
         <h2>{entry.title}</h2>
+        <div className="document-toolbar">
+          <CopyTextButton
+            className="btn"
+            content={entry.content}
+            label="Copy full text"
+            showLabel
+          />
+        </div>
         <div className="note-body">{entry.content}</div>
       </article>
     </main>

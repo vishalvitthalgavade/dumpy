@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { CopyIcon } from "@/components/Icons";
+import { CheckIcon, CopyIcon } from "@/components/Icons";
 
 export function CopyTextButton({
   className = "icon-btn",
   content,
-  label = "Copy text"
+  label = "Copy text",
+  showLabel = false
 }: {
   className?: string;
   content: string;
   label?: string;
+  showLabel?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -23,13 +25,15 @@ export function CopyTextButton({
   return (
     <button
       aria-label={copied ? "Text copied" : label}
-      className={className}
+      className={copied ? `${className} copied` : className}
       onClick={copyText}
       title={copied ? "Copied" : label}
       type="button"
     >
-      {copied ? <span aria-hidden="true">OK</span> : <CopyIcon />}
-      <span className="sr-only">{copied ? "Copied" : label}</span>
+      {copied ? <CheckIcon /> : <CopyIcon />}
+      <span className={showLabel ? undefined : "sr-only"}>
+        {copied ? "Copied" : label}
+      </span>
     </button>
   );
 }

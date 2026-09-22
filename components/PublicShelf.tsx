@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
+  CheckIcon,
   CopyIcon,
   EyeIcon,
   FileIcon,
@@ -12,6 +13,8 @@ import type { ContentAnalytics } from "@/lib/analytics";
 import type { StoredFile } from "@/lib/db";
 import { formatShortDate } from "@/lib/format";
 
+type SortOrder = "newest" | "oldest" | "views";
+
 export function PublicShelf({
   analyticsById = {},
   pdfs
@@ -21,17 +24,34 @@ export function PublicShelf({
 }) {
   const [query, setQuery] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   const filtered = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase();
-    if (!cleanQuery) {
-      return pdfs;
-    }
+    const matches = !cleanQuery
+      ? pdfs
+      : pdfs.filter((pdf) =>
+          `${pdf.title} ${pdf.fileName}`.toLowerCase().includes(cleanQuery)
+        );
 
-    return pdfs.filter((pdf) =>
-      `${pdf.title} ${pdf.fileName}`.toLowerCase().includes(cleanQuery)
-    );
-  }, [pdfs, query]);
+    const sorted = [...matches];
+    if (sortOrder === "oldest") {
+      sorted.sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    } else if (sortOrder === "views") {
+      sorted.sort(
+        (a, b) =>
+          (analyticsById[b.id]?.totalViews ?? 0) -
+          (analyticsById[a.id]?.totalViews ?? 0)
+      );
+    } else {
+      sorted.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    }
+    return sorted;
+  }, [pdfs, query, sortOrder, analyticsById]);
 
   async function copyLink(id: string) {
     const link = `${window.location.origin}/api/files/${id}`;
@@ -50,16 +70,28 @@ export function PublicShelf({
         <span className="muted">{filtered.length} available</span>
       </div>
 
-      <label className="search-field shelf-search">
-        <SearchIcon />
-        <span className="sr-only">Search files</span>
-        <input
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Type a title or filename"
-          type="search"
-          value={query}
-        />
-      </label>
+      <div className="shelf-toolbar">
+        <label className="search-field">
+          <SearchIcon />
+          <span className="sr-only">Search files</span>
+          <input
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Type a title or filename"
+            type="search"
+            value={query}
+          />
+        </label>
+        <select
+          aria-label="Sort files"
+          className="sort-select"
+          onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+          value={sortOrder}
+        >
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="views">Most viewed</option>
+        </select>
+      </div>
 
       <div className="pdf-list">
         {filtered.length === 0 ? (
@@ -111,12 +143,14 @@ export function PublicShelf({
                     </MotionPress>
                     <MotionPress>
                       <button
-                        className="icon-btn"
+                        className={
+                          copiedId === pdf.id ? "icon-btn copied" : "icon-btn"
+                        }
                         onClick={() => copyLink(pdf.id)}
-                        title="Copy link"
+                        title={copiedId === pdf.id ? "Copied" : "Copy link"}
                         type="button"
                       >
-                        <CopyIcon />
+                        {copiedId === pdf.id ? <CheckIcon /> : <CopyIcon />}
                         <span className="sr-only">
                           {copiedId === pdf.id ? "Copied" : "Copy link"}
                         </span>
