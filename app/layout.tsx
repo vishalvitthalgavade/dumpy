@@ -27,9 +27,14 @@ try {
 `
           }}
         />
+        <a className="skip-link" href="#main-content">
+          Skip to content
+        </a>
         <MotionRoot>
           <ThemeToggle />
-          <PageMotion>{children}</PageMotion>
+          <PageMotion>
+            <div id="main-content">{children}</div>
+          </PageMotion>
         </MotionRoot>
       </body>
     </html>

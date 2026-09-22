@@ -1,85 +1,108 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { ArrowIcon, FileIcon, SparkIcon, TextIcon } from "@/components/Icons";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
-import { CopyTextButton } from "@/components/CopyTextButton";
-import { DataNotice } from "@/components/DataNotice";
-import { EyeIcon, TextIcon, UserIcon } from "@/components/Icons";
+import { PublicShelf } from "@/components/PublicShelf";
+import { TextShelf } from "@/components/TextShelf";
+import { AnimatedCounter, MotionCard, MotionPress } from "@/components/MotionPrimitives";
 import { SetupNotice } from "@/components/SetupNotice";
 import { getMissingConfig } from "@/lib/config";
-import { getTextEntry } from "@/lib/db";
-import { formatDate } from "@/lib/format";
-import { getContentAnalytics, getTextAnalyticsPaths } from "@/lib/analytics";
+import { getFiles, getTextEntries, type StoredFile, type TextEntry } from "@/lib/db";
+import { getFileAnalyticsMap, getTextAnalyticsMap, type ContentAnalytics } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
-export default async function TextView({
-  params
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function Home() {
   const missingConfig = getMissingConfig();
   if (missingConfig.length > 0) {
     return <SetupNotice missing={missingConfig} />;
   }
 
-  const { id } = await params;
-  const entry = await getTextEntry(id).catch(() => undefined);
+  let pdfs: StoredFile[] = [];
+  let textEntries: TextEntry[] = [];
+  let pdfAnalytics: Record<string, ContentAnalytics> = {};
+  let textAnalytics: Record<string, ContentAnalytics> = {};
 
-  if (entry === undefined) {
-    return <DataNotice />;
+  try {
+    [pdfs, textEntries, pdfAnalytics, textAnalytics] = await Promise.all([
+      getFiles(),
+      getTextEntries(),
+      getFileAnalyticsMap(),
+      getTextAnalyticsMap()
+    ]);
+  } catch {
+    // The public landing page must remain accessible even when the database
+    // or analytics service is temporarily unavailable.
   }
-
-  if (!entry) {
-    notFound();
-  }
-
-  const analytics = await getContentAnalytics(getTextAnalyticsPaths(entry.id));
 
   return (
     <main className="shell">
-      <AnalyticsTracker path={`/texts/${entry.id}`} />
+      <AnalyticsTracker path="/" />
       <header className="topbar">
         <div className="brand">
           <div className="mark">D</div>
           <div>
             <h1>Dumpyard</h1>
-            <p>{formatDate(entry.createdAt)}</p>
+            <p>Public knowledge shelf</p>
           </div>
         </div>
         <nav className="nav">
-          <Link className="btn" href="/">
-            Back
-          </Link>
           <Link className="btn" href="/admin">
             Admin
           </Link>
         </nav>
       </header>
 
-      <article className="text-document">
-        <div className="document-meta">
-          <div className="resource-icon text-icon">
-            <TextIcon />
+      <section className="hero">
+        <div className="hero-content">
+          <div className="eyebrow">
+            <SparkIcon />
+            Curated repository
           </div>
-          <span>Saved {formatDate(entry.createdAt)}</span>
-          <span>
-            <EyeIcon /> {analytics.totalViews} views
-          </span>
-          <span>
-            <UserIcon /> Viewed by {analytics.uniqueViews} unique visitors
-          </span>
+          <h2>Everything worth keeping, organized in one polished shelf.</h2>
+          <p>
+            Browse uploaded files and saved text entries with crisp metadata, fast
+            search, downloads, and a calm interface built for reading.
+          </p>
+          <div className="hero-actions">
+            <MotionPress>
+              <a className="btn primary" href="#content">
+                Explore content
+                <ArrowIcon />
+              </a>
+            </MotionPress>
+            <MotionPress>
+              <Link className="btn ghost" href="/admin">
+                Admin
+              </Link>
+            </MotionPress>
+          </div>
         </div>
-        <h2>{entry.title}</h2>
-        <div className="document-toolbar">
-          <CopyTextButton
-            className="btn"
-            content={entry.content}
-            label="Copy full text"
-            showLabel
-          />
+        <div className="hero-panel" aria-label="Repository stats">
+          <MotionCard as="div" className="stat-card">
+            <div className="resource-icon pdf-icon">
+              <FileIcon />
+            </div>
+            <span>File Library</span>
+            <strong>
+              <AnimatedCounter value={pdfs.length} />
+            </strong>
+          </MotionCard>
+          <MotionCard as="div" className="stat-card" delay={0.05}>
+            <div className="resource-icon text-icon">
+              <TextIcon />
+            </div>
+            <span>Saved Texts</span>
+            <strong>
+              <AnimatedCounter value={textEntries.length} />
+            </strong>
+          </MotionCard>
         </div>
-        <div className="note-body">{entry.content}</div>
-      </article>
+      </section>
+
+      <div className="grid" id="content">
+        <PublicShelf analyticsById={pdfAnalytics} pdfs={pdfs} />
+        <TextShelf analyticsById={textAnalytics} entries={textEntries} />
+      </div>
     </main>
   );
 }
