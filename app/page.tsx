@@ -32,13 +32,17 @@ export default async function Home() {
       <AnalyticsTracker path="/" />
       <header className="topbar">
         <div className="brand"><div className="mark">D</div><div><h1>Dumpyard</h1><p>Your shared files and notes</p></div></div>
-        <nav className="nav"><Link className="btn" href="/admin/login">Admin</Link></nav>
+        <nav aria-label="Main navigation" className="nav public-nav">
+          <a className="nav-link" href="#files">Files</a>
+          <a className="nav-link" href="#texts">Notes</a>
+          <Link className="btn compact" href="/admin/login">Admin</Link>
+        </nav>
       </header>
       <section className="hero">
         <div className="hero-content">
           <div className="eyebrow">A simple, shared library</div>
-          <h2>Files and notes, all in one place.</h2>
-          <p>Browse, search, and download the resources saved to this shelf.</p>
+          <h2>Your resources, ready when you need them.</h2>
+          <p>Browse a thoughtfully organized collection of shared files and notes. Search, sort, preview, and download from any device.</p>
           <div className="hero-actions"><a className="btn primary" href="#files">Browse files</a><a className="btn" href="#texts">Read notes</a></div>
         </div>
         <div className="hero-panel"><div className="stat-card"><strong>{files.length}</strong><span>Files available</span></div><div className="stat-card"><strong>{texts.length}</strong><span>Saved notes</span></div></div>

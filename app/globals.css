@@ -1037,6 +1037,100 @@ select:focus-visible,
   font-weight: 600;
 }
 
+.public-nav {
+  justify-content: flex-end;
+}
+
+.nav-link {
+  border-radius: 10px;
+  padding: 9px 11px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 740;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.nav-link:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.grid > div,
+#files,
+#texts {
+  min-width: 0;
+  scroll-margin-top: 100px;
+}
+
+.upload-progress {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 12px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.upload-progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.upload-progress-label strong {
+  color: var(--primary-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.upload-progress progress {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--primary);
+  accent-color: var(--primary);
+}
+
+.upload-progress progress::-webkit-progress-bar {
+  border-radius: 999px;
+  background: var(--chip-bg);
+}
+
+.upload-progress progress::-webkit-progress-value {
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  transition: width 180ms ease;
+}
+
+.upload-progress progress::-moz-progress-bar {
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.dropzone:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+html[data-theme="dark"] .mark {
+  border-color: rgba(119, 151, 239, 0.28);
+  background: linear-gradient(145deg, rgba(119, 151, 239, 0.2), rgba(119, 151, 239, 0.05));
+}
+
+html[data-theme="dark"] .btn.primary,
+html[data-theme="dark"] .icon-btn.primary {
+  color: #111622;
+}
+
+html[data-theme="dark"] .hero::after {
+  background: radial-gradient(circle, rgba(119, 151, 239, 0.15), transparent 66%);
+}
+
 @media (max-width: 1080px) {
   .analytics-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

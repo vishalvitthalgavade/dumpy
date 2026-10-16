@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createTextAction, deleteFileAction, deleteTextAction, logoutAction, uploadFileAction } from "@/app/actions";
+import { createTextAction, deleteFileAction, deleteTextAction, logoutAction } from "@/app/actions";
 import { AdminFileList } from "@/components/AdminFileList";
 import { AdminTextList } from "@/components/AdminTextList";
+import { FileUploader } from "@/components/FileUploader";
 import { SubmitButton } from "@/components/SubmitButton";
 import { SetupNotice } from "@/components/SetupNotice";
 import { getMissingConfig } from "@/lib/config";
@@ -36,11 +37,7 @@ export default async function Admin() {
     </section>
     <div className="admin-grid admin-compose">
       <section className="panel upload-panel"><div className="panel-heading"><div><p className="kicker">Upload</p><h3>Add a file</h3></div></div>
-        <form action={uploadFileAction} className="form">
-          <label className="field"><span>Title <em>(optional)</em></span><input className="input" name="title" placeholder="Use the filename by default" /></label>
-          <label className="dropzone"><strong>Choose a file to add</strong><span>Documents, images, audio, video, archives, and code files up to 10 MB</span><input className="file-input" name="file" required type="file" /></label>
-          <SubmitButton pendingLabel="Uploading...">Upload file</SubmitButton>
-        </form>
+        <FileUploader storageReady={Boolean(process.env.BLOB_READ_WRITE_TOKEN)} />
       </section>
       <section className="panel"><div className="panel-heading"><div><p className="kicker">Compose</p><h3>Save a text note</h3></div></div>
         <form action={createTextAction} className="form"><label className="field"><span>Headline</span><input className="input" name="title" required /></label><label className="field"><span>Text</span><textarea className="textarea" name="content" required /></label><SubmitButton pendingLabel="Saving...">Save note</SubmitButton></form>

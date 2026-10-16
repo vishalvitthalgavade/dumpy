@@ -1,6 +1,6 @@
 # Dumpyard
 
-Dumpyard is a public read-only PDF and note shelf with one admin account for uploading, editing, and deleting content.
+Dumpyard is a public file and note shelf with one admin account for uploading, editing, and deleting content.
 
 ## Local setup
 
@@ -15,6 +15,7 @@ Dumpyard is a public read-only PDF and note shelf with one admin account for upl
    - `DATABASE_URL`
    - `ADMIN_PASSWORD`
    - `AUTH_SECRET`
+   - `BLOB_READ_WRITE_TOKEN` (connect a Vercel Blob store for file uploads)
 
 3. Create the database tables:
 
@@ -30,6 +31,6 @@ Dumpyard is a public read-only PDF and note shelf with one admin account for upl
 
 ## Vercel deployment
 
-Add the same environment variables in Vercel Project Settings, then run `npm run db:migrate` once against the production database from your machine.
+Connect a Vercel Blob store to the project so Vercel provisions `BLOB_READ_WRITE_TOKEN`. Add `DATABASE_URL`, `ADMIN_PASSWORD`, and `AUTH_SECRET` in Vercel Project Settings, then run `npm run db:migrate` once against the production database from your machine.
 
-PDFs are stored in PostgreSQL as `bytea` so they stay available across Vercel deployments. Keep uploads modest in size; for large files, use Vercel Blob/S3 and store only URLs in PostgreSQL.
+Files upload directly from the browser to Vercel Blob using multipart transfer, so uploads do not pass through the Vercel Function request-size limit. The app accepts files up to 200 MB, shows upload progress, and stores file metadata and Blob URLs in PostgreSQL. Existing files stored in PostgreSQL remain available.

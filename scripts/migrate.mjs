@@ -27,9 +27,13 @@ await pool.query(`
     file_name TEXT NOT NULL,
     mime_type TEXT NOT NULL DEFAULT 'application/pdf',
     size_bytes INTEGER NOT NULL,
-    data BYTEA NOT NULL,
+    data BYTEA,
+    blob_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   );
+
+  ALTER TABLE stored_files ADD COLUMN IF NOT EXISTS blob_url TEXT;
+  ALTER TABLE stored_files ALTER COLUMN data DROP NOT NULL;
 
   CREATE TABLE IF NOT EXISTS stored_files (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

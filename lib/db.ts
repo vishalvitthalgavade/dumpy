@@ -47,9 +47,13 @@ async function ensureSchema() {
       file_name TEXT NOT NULL,
       mime_type TEXT NOT NULL DEFAULT 'application/octet-stream',
       size_bytes INTEGER NOT NULL,
-      data BYTEA NOT NULL,
+      data BYTEA,
+      blob_url TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    ALTER TABLE stored_files ADD COLUMN IF NOT EXISTS blob_url TEXT;
+    ALTER TABLE stored_files ALTER COLUMN data DROP NOT NULL;
 
     CREATE INDEX IF NOT EXISTS stored_files_created_at_idx
       ON stored_files (created_at);
@@ -146,17 +150,18 @@ export type StoredFile = {
   mimeType: string;
   sizeBytes: number;
   createdAt: string;
+  blobUrl?: string | null;
 };
 
 export async function getFiles(): Promise<StoredFile[]> {
   await ensureSchema();
   const result = await getPool().query<{
-    id: string; title: string; file_name: string; mime_type: string;
+    id: string; title: string; file_name: string; mime_type: string; blob_url: string | null;
     size_bytes: number; created_at: Date;
-  }>(`SELECT id, title, file_name, mime_type, size_bytes, created_at
+  }>(`SELECT id, title, file_name, mime_type, blob_url, size_bytes, created_at
       FROM stored_files ORDER BY created_at DESC`);
   return result.rows.map((row) => ({
-    id: row.id, title: row.title, fileName: row.file_name, mimeType: row.mime_type,
+    id: row.id, title: row.title, fileName: row.file_name, mimeType: row.mime_type, blobUrl: row.blob_url,
     sizeBytes: row.size_bytes, createdAt: row.created_at.toISOString()
   }));
 }
@@ -164,10 +169,10 @@ export async function getFiles(): Promise<StoredFile[]> {
 export async function getFileMeta(id: string): Promise<StoredFile | null> {
   await ensureSchema();
   const result = await getPool().query<{
-    id: string; title: string; file_name: string; mime_type: string;
+    id: string; title: string; file_name: string; mime_type: string; blob_url: string | null;
     size_bytes: number; created_at: Date;
   }>(
-    `SELECT id, title, file_name, mime_type, size_bytes, created_at
+    `SELECT id, title, file_name, mime_type, blob_url, size_bytes, created_at
      FROM stored_files WHERE id = $1`,
     [id]
   );
@@ -176,7 +181,7 @@ export async function getFileMeta(id: string): Promise<StoredFile | null> {
     return null;
   }
   return {
-    id: row.id, title: row.title, fileName: row.file_name, mimeType: row.mime_type,
+    id: row.id, title: row.title, fileName: row.file_name, mimeType: row.mime_type, blobUrl: row.blob_url,
     sizeBytes: row.size_bytes, createdAt: row.created_at.toISOString()
   };
 }
@@ -184,19 +189,19 @@ export async function getFileMeta(id: string): Promise<StoredFile | null> {
 export async function getFile(id: string) {
   await ensureSchema();
   const result = await getPool().query<{
-    title: string; file_name: string; mime_type: string; data: Buffer;
-  }>(`SELECT title, file_name, mime_type, data FROM stored_files WHERE id = $1`, [id]);
+    title: string; file_name: string; mime_type: string; data: Buffer | null; blob_url: string | null;
+  }>(`SELECT title, file_name, mime_type, data, blob_url FROM stored_files WHERE id = $1`, [id]);
   return result.rows[0] ?? null;
 }
 
 export async function createFile(input: {
-  title: string; fileName: string; mimeType: string; sizeBytes: number; data: Buffer;
+  title: string; fileName: string; mimeType: string; sizeBytes: number; data?: Buffer; blobUrl?: string;
 }) {
   await ensureSchema();
   const result = await getPool().query<{ id: string }>(
-    `INSERT INTO stored_files (title, file_name, mime_type, size_bytes, data)
-     VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-    [input.title, input.fileName, input.mimeType, input.sizeBytes, input.data]
+    `INSERT INTO stored_files (title, file_name, mime_type, size_bytes, data, blob_url)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+    [input.title, input.fileName, input.mimeType, input.sizeBytes, input.data ?? null, input.blobUrl ?? null]
   );
   return result.rows[0]?.id;
 }
